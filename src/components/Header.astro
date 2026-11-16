@@ -1,0 +1,17 @@
+---
+// MENU — Importe la liste partagée et identifie la page actuelle.
+import { navigation } from '../data/navigation.js';
+const currentPath = Astro.url.pathname;
+---
+<!-- EN-TÊTE — Affiche le nom et la navigation commune avec les styles de components.css. -->
+<header class="site-header">
+  <a class="brand" href="/">Konstance Kruger<span>Portfolio</span></a>
+  <!-- MOBILE — Le bouton contrôle l’ouverture du menu et annonce son état. -->
+  <button class="menu-toggle" aria-expanded="false" aria-controls="navigation" hidden>Menu</button>
+  <nav id="navigation" aria-label="Navigation principale">
+    <ul class="menu">
+      <!-- LIENS — Produit un lien pour chaque entrée de navigation. -->
+      {navigation.map(({href, label}) => <li><a href={href} aria-current={currentPath === href ? 'page' : undefined}>{label}</a></li>)}
+    </ul>
+  </nav>
+</header>

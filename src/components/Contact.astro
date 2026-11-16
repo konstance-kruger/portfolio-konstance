@@ -1,0 +1,143 @@
+---
+import { profile } from '../data/profile.js';
+---
+
+<section
+  id="contact"
+  class="chapter contact-section contact-editorial"
+  aria-labelledby="titre-contact"
+>
+
+  <!-- INTRODUCTION -->
+
+  <div class="section-heading" data-reveal>
+    <span class="eyebrow">
+      03 / CONTACT
+    </span>
+
+    <span>La suite reste à écrire.</span>
+  </div>
+
+  <!-- GRAND TITRE -->
+
+  <h2 id="titre-contact" data-reveal>
+    ON EN<br />
+    <em>PARLE ?</em>
+  </h2>
+
+  <!-- FORMULAIRE -->
+
+  <form
+    class="contact-form"
+    data-contact-form
+    data-email={profile.email}
+    data-reveal
+  >
+
+    <label>
+      Votre nom
+
+      <input
+        name="name"
+        type="text"
+        autocomplete="name"
+        required
+        placeholder="Votre nom"
+      />
+    </label>
+
+    <label>
+      Votre e-mail
+
+      <input
+        name="email"
+        type="email"
+        autocomplete="email"
+        required
+        placeholder="vous@exemple.fr"
+      />
+    </label>
+
+    <label>
+      Votre message
+
+      <textarea
+        name="message"
+        rows="4"
+        required
+        placeholder="Parlons de votre idée…"
+      ></textarea>
+    </label>
+
+    <button type="submit">
+      Préparer mon message ↗
+    </button>
+
+    <p
+      class="contact-status"
+      data-contact-status
+      role="status"
+    >
+      {
+        profile.email
+          ? "Le bouton ouvre votre messagerie pour envoyer le message."
+          : "Adresse de contact à renseigner dans src/data/profile.js avant la mise en ligne."
+      }
+    </p>
+
+  </form>
+
+  <!-- RÉSEAUX PROFESSIONNELS -->
+
+  <div class="social-links">
+
+    {
+      profile.linkedin && (
+        <a
+          href={profile.linkedin}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          LinkedIn ↗
+        </a>
+      )
+    }
+
+    {
+      profile.instagram && (
+        <a
+          href={profile.instagram}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Instagram ↗
+        </a>
+      )
+    }
+
+  </div>
+
+  <!-- MENU FINAL -->
+
+  <nav
+    class="contact-endnav"
+    aria-label="Menu de fin de parcours"
+  >
+    <a href="#contenu">
+      Retour au début ↑
+    </a>
+
+    <a href="#projets">
+      Projets
+    </a>
+
+    <a href="#apropos">
+      À propos
+    </a>
+
+    <a href="#contact">
+      Contact
+    </a>
+  </nav>
+
+</section>

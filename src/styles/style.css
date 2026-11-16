@@ -1,0 +1,8 @@
+/* STYLES COMMUNS — Variables, base et composants des pages secondaires.
+   Le magazine (accueil) a sa propre feuille : editorial-journey.css.
+   Tailwind et DaisyUI ont été retirés : le magazine est entièrement en CSS sur mesure
+   et ne les utilisait pas (code chargé pour rien). */
+@import "./variables.css";
+@import "./base.css";
+@import "./components.css";
+/* home.css (ancienne page d’accueil) n’est plus chargée : ses styles ne servent plus. */

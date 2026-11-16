@@ -1,0 +1,9 @@
+:root {
+  --paper: #ffffff;
+  --ink: #323232;
+  --pink: #f0c6de;
+  --lime: #c7f000;
+  --font-body: 'General Sans', Arial, sans-serif;
+  --font-title: 'Melodrama', Georgia, serif;
+  --width: 1440px;
+}

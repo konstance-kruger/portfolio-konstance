@@ -1,0 +1,68 @@
+---
+// MENTIONS LÉGALES — Informations obligatoires pour un site publié en France
+// (loi pour la confiance dans l'économie numérique, art. 6) : qui édite le site,
+// qui l'héberge, à qui appartiennent les contenus, quelles données sont collectées.
+// L'adresse e-mail vient de src/data/profile.js : une seule source à tenir à jour.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { profile } from '../data/profile.js';
+---
+<BaseLayout
+  title="Mentions légales — Konstance Kruger"
+  description="Mentions légales du portfolio de Konstance Kruger : éditrice, hébergeur, crédits et données personnelles."
+>
+  <h1>Mentions légales</h1>
+
+  <!-- ÉDITION — Personne responsable du site. -->
+  <h2>Édition du site</h2>
+  <p>
+    Ce site est le portfolio personnel de Konstance Kruger, étudiante en BUT Métiers du
+    Multimédia et de l’Internet. Il est édité à titre non professionnel.
+  </p>
+  <p>
+    {profile.email
+      ? <Fragment>Contact&nbsp;: <a href={`mailto:${profile.email}`}>{profile.email}</a></Fragment>
+      : <strong>Contact&nbsp;: adresse e-mail à renseigner dans src/data/profile.js</strong>}
+  </p>
+  <p>Directrice de la publication&nbsp;: Konstance Kruger.</p>
+
+  <!-- HÉBERGEMENT — Coordonnées de l'hébergeur (vérifiées sur les documents d'Infomaniak). -->
+  <h2>Hébergement</h2>
+  <p>
+    Infomaniak Network SA<br />
+    Rue Eugène-Marziano 25, 1227 Les Acacias (Genève), Suisse<br />
+    <a href="https://www.infomaniak.com" rel="noopener noreferrer">www.infomaniak.com</a>
+  </p>
+
+  <!-- PROPRIÉTÉ — Droits sur les textes, images et dessins. -->
+  <h2>Propriété intellectuelle et crédits</h2>
+  <p>
+    Sauf mention contraire, les textes, la mise en page, les dessins et les créations
+    graphiques sont de Konstance Kruger. Toute reproduction demande son accord.
+  </p>
+  <ul>
+    <li>Photographie de la Nuit du volley&nbsp;: © Ethan HDM.</li>
+    <li>
+      Polices de caractères&nbsp;: General Sans et Melodrama, de l’Indian Type Foundry,
+      distribuées par Fontshare sous licence ITF Free Font License.
+    </li>
+  </ul>
+
+  <!-- DROIT À L'IMAGE — Les photos montrent des personnes identifiables. -->
+  <h2>Droit à l’image</h2>
+  <p>
+    Les photographies montrent des événements étudiants (CAPS, SPAC, WebTV, Festival Inouï).
+    Si vous apparaissez sur l’une d’elles et souhaitez qu’elle soit retirée, écrivez-moi&nbsp;:
+    elle le sera dans les plus brefs délais.
+  </p>
+
+  <!-- DONNÉES — Ce que le site collecte réellement. -->
+  <h2>Données personnelles et cookies</h2>
+  <p>
+    Ce site ne dépose aucun cookie, ne contient ni formulaire ni outil de mesure d’audience,
+    et ne collecte aucune donnée personnelle.
+  </p>
+  <p>
+    Les polices sont chargées depuis les serveurs de Fontshare&nbsp;: comme pour toute page web,
+    votre navigateur leur transmet alors techniquement votre adresse IP.
+  </p>
+</BaseLayout>

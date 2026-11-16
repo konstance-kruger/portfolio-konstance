@@ -1,0 +1,398 @@
+---
+// Chaque projet est présenté directement
+// dans la page d'accueil.
+
+import Media from './Media.astro';
+import '../styles/projects.css';
+
+// Activités CAPS
+const caps = [
+  {
+    title: 'Tournois sportifs',
+    image: 'caps-tournoi.webp',
+    note: 'Animation et production de rencontres sportives',
+  },
+  {
+    title: 'Podcasts',
+    image: 'caps-podcast.webp',
+    note: 'Format audio et vidéo',
+  },
+  {
+    title: 'E-sport',
+    image: 'caps-esport.webp',
+    note: 'Captation et diffusion de compétitions',
+  },
+];
+
+// Activités SPAC
+const spac = [
+  {
+    title: 'Communication',
+    image: 'spac-communication.webp',
+    note: 'Supports graphiques et publications',
+  },
+  {
+    title: 'Événements',
+    image: 'spac-evenement.webp',
+    note: 'Préparation des rendez-vous étudiants',
+  },
+];
+
+// Galerie évolutive de créations personnelles
+const creations = Array.from(
+  { length: 6 },
+  (_, i) => ({
+    image: `creation-${String(i + 1).padStart(2, '0')}.webp`,
+    title: `Création ${String(i + 1).padStart(2, '0')}`,
+  })
+);
+---
+
+<section
+  id="projets"
+  class="editorial-projects"
+  aria-labelledby="titre-projets"
+>
+
+  <!-- INTRODUCTION DES PROJETS -->
+
+  <div class="projects-cover" data-reveal>
+    <span class="eyebrow">
+      01 / ACTIVITÉS & RÉALISATIONS
+    </span>
+
+    <h2 id="titre-projets">
+      SELECTED <em>work.</em>
+    </h2>
+
+    <p>
+      Audiovisuel, événementiel,
+      photographie et création graphique.
+    </p>
+  </div>
+
+  <!--
+    CANVAS : les trois chapitres et
+    un seul tracé SVG continu.
+  -->
+
+  <div class="projects-canvas">
+
+    <svg
+      class="projects-trace"
+      aria-hidden="true"
+      focusable="false"
+      preserveAspectRatio="none"
+    >
+      <path
+        class="projects-trace-path"
+        fill="none"
+        stroke="#F66BB2"
+        stroke-width="3"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+
+    <!-- ====================================
+         PROJET 01 — CAPS
+         ==================================== -->
+
+    <article
+      class="project-chapter project-chapter--caps"
+      id="caps"
+      aria-labelledby="caps-title"
+    >
+
+      <header class="project-head" data-reveal>
+        <span class="project-index">
+          01 / AUDIOVISUEL
+        </span>
+
+        <h3 id="caps-title">
+          CAPS<span class="project-period">.</span>
+        </h3>
+
+        <p>
+          Une association audiovisuelle cofondée
+          en janvier 2026 pour imaginer, produire
+          et expérimenter ensemble.
+        </p>
+      </header>
+
+      <div class="project-feature">
+
+        <!-- Point de passage de la ligne -->
+        <div
+          class="project-anchor"
+          aria-hidden="true"
+        ></div>
+
+        <!-- Image principale -->
+        <div class="project-feature-media" data-reveal>
+          <Media
+            file="caps-cover.webp"
+            alt="Visuel du projet CAPS"
+            label="Ajouter le visuel principal de CAPS"
+          />
+
+          <span class="media-index">
+            CAPS / 001
+          </span>
+        </div>
+
+        <!-- Présentation -->
+        <div class="project-feature-copy" data-reveal>
+          <span class="eyebrow">
+            MEMBRE DU BUREAU · COFONDATRICE
+          </span>
+
+          <h4>
+            Créer, produire,
+            <em>diffuser.</em>
+          </h4>
+
+          <p>
+            Selon les productions, je participe
+            à l'organisation, à la régie, à
+            l'installation du matériel ou à
+            l'animation des lives. Cette diversité
+            fait partie de mon rôle.
+          </p>
+
+          <p>
+            Nos activités comprennent notamment
+            des animations de tournois sportifs,
+            des podcasts et des événements e-sport.
+          </p>
+        </div>
+      </div>
+
+      <!-- Planches qui glissent au scroll -->
+      <div
+        class="editorial-strip"
+        data-horizontal
+        aria-label="Aperçus des activités de CAPS"
+      >
+        {
+          caps.map((item, i) => (
+            <figure class="strip-item" data-reveal>
+              <Media
+                file={item.image}
+                alt={`Visuel à ajouter : ${item.title}`}
+                label={`Ajouter : ${item.title}`}
+              />
+
+              <figcaption>
+                <span>
+                  0{i + 1} / {item.title}
+                </span>
+
+                <small>{item.note}</small>
+              </figcaption>
+            </figure>
+          ))
+        }
+      </div>
+
+      <p class="project-note">
+        Les rediffusions et extraits seront ajoutés
+        lorsque leurs liens et les autorisations
+        de diffusion seront disponibles.
+      </p>
+
+    </article>
+
+    <!-- ====================================
+         PROJET 02 — SPAC
+         ==================================== -->
+
+    <article
+      class="project-chapter project-chapter--spac"
+      id="spac"
+      aria-labelledby="spac-title"
+    >
+
+      <header
+        class="project-head project-head--right"
+        data-reveal
+      >
+        <span class="project-index">
+          02 / ÉVÉNEMENTIEL & COMMUNICATION
+        </span>
+
+        <h3 id="spac-title">
+          SPAC<span class="project-period">.</span>
+        </h3>
+
+        <p>
+          Le BDE MMI : participer à la vie
+          étudiante et développer des événements
+          qui rassemblent.
+        </p>
+      </header>
+
+      <div class="project-feature project-feature--reverse">
+
+        <div
+          class="project-anchor"
+          aria-hidden="true"
+        ></div>
+
+        <div class="project-feature-media" data-reveal>
+          <Media
+            file="spac-cover.webp"
+            alt="Visuel du projet SPAC, BDE MMI"
+            label="Ajouter le visuel principal de SPAC"
+          />
+
+          <span class="media-index">
+            SPAC / 002
+          </span>
+        </div>
+
+        <div class="project-feature-copy" data-reveal>
+          <span class="eyebrow">
+            VICE-PRÉSIDENTE · DEPUIS SEPTEMBRE 2026
+          </span>
+
+          <h4>
+            Des idées qui
+            <em>rassemblent.</em>
+          </h4>
+
+          <p>
+            Je participe à la coordination du BDE
+            et m'occupe particulièrement de la
+            communication, de la création graphique
+            et des contacts liés aux événements.
+          </p>
+
+          <p>
+            Parmi les projets en préparation :
+            bal de promotion, soirée inter-BDE
+            et nuit du cinéma. Ils seront présentés
+            comme réalisations une fois organisés.
+          </p>
+        </div>
+      </div>
+
+      <div
+        class="editorial-strip editorial-strip--two"
+        data-horizontal
+        aria-label="Communication et événements de SPAC"
+      >
+        {
+          spac.map((item, i) => (
+            <figure class="strip-item" data-reveal>
+              <Media
+                file={item.image}
+                alt={`Visuel à ajouter : ${item.title}`}
+                label={`Ajouter : ${item.title}`}
+              />
+
+              <figcaption>
+                <span>
+                  0{i + 1} / {item.title}
+                </span>
+
+                <small>{item.note}</small>
+              </figcaption>
+            </figure>
+          ))
+        }
+      </div>
+
+    </article>
+
+    <!-- ====================================
+         PROJET 03 — CRÉATIONS
+         ==================================== -->
+
+    <article
+      class="project-chapter project-chapter--creations"
+      id="creations"
+      aria-labelledby="creations-title"
+    >
+
+      <header class="project-head" data-reveal>
+        <span class="project-index">
+          03 / EXPÉRIMENTATIONS GRAPHIQUES
+        </span>
+
+        <h3 id="creations-title">
+          CRÉATIONS<span class="project-period">.</span>
+        </h3>
+
+        <p>
+          Photographies, affiches et recherches
+          personnelles : un espace pour expérimenter.
+        </p>
+      </header>
+
+      <div
+        class="project-anchor"
+        aria-hidden="true"
+      ></div>
+
+      <!-- Galerie style magazine -->
+      <div
+        class="creations-magazine"
+        aria-label="Galerie de créations personnelles"
+      >
+        {
+          creations.map((item, i) => (
+            <figure class="creation-page" data-reveal>
+
+              <button
+                type="button"
+                class="creation-open"
+                data-lightbox={`/assets/images/${item.image}`}
+                data-lightbox-title={item.title}
+                aria-label={`Agrandir ${item.title}`}
+              >
+                <Media
+                  file={item.image}
+                  alt={item.title}
+                  label={`${item.title} : image à ajouter`}
+                  portrait
+                />
+              </button>
+
+              <figcaption>
+                KK — {String(i + 1).padStart(2, '0')}
+                / {item.title}
+              </figcaption>
+            </figure>
+          ))
+        }
+      </div>
+
+      <p class="project-note">
+        Cette galerie est évolutive :
+        les fichiers définitifs remplaceront
+        progressivement les emplacements.
+      </p>
+
+    </article>
+
+  </div>
+</section>
+
+<!-- Fenêtre accessible pour agrandir les affiches -->
+<dialog
+  class="creation-dialog"
+  id="creation-dialog"
+  aria-label="Agrandissement d'une création"
+>
+  <button
+    type="button"
+    class="creation-dialog-close"
+    aria-label="Fermer"
+  >
+    Fermer ×
+  </button>
+
+  <img src="" alt="" />
+  <p></p>
+</dialog>

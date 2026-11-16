@@ -1,0 +1,1988 @@
+/* ==================================================================
+   KONSTANCE KRUGER — PORTFOLIO ÉDITORIAL
+   14 doubles pages / 5 chapitres
+
+   Organisation du fichier :
+   1. Variables (palette validée, polices)
+   2. Structure du magazine (espace 2D, doubles pages, pages)
+   3. Briques communes (cadres photo, emplacements réservés, folios)
+   4. Les 14 doubles pages, dans l'ordre
+   5. Commandes de navigation
+   6. Mobile (lecture verticale, adaptée au tactile)
+
+   Règle importante : toutes les règles sont préfixées par .mag pour ne pas
+   être perturbées par les styles généraux du site (style.css, home.css…).
+   Les images du magazine n'ont AUCUNE règle générale : chaque image remplit
+   le cadre (.frame) qui la contient, et c'est ce cadre qui est placé.
+   ================================================================== */
+
+/* ------------------------------------------------------------------
+   1. VARIABLES
+   ------------------------------------------------------------------ */
+.mag {
+  --white: #ffffff;
+  --ink: #323232;          /* gris foncé */
+  --powder: #f0c6de;       /* rose poudré */
+  --lime: #c7f000;         /* vert lime */
+  --light: #dedede;        /* gris clair */
+
+  /* Uniquement Melodrama et General Sans (chargées par BaseLayout). */
+  --serif: 'Melodrama', serif;
+  --sans: 'General Sans', sans-serif;
+
+  /* Courbe d'animation commune : départ vif, arrivée très douce. */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Marges des pages, proportionnelles à l'écran
+     (≈ 10 % de la largeur d'une page, ≈ 9 % de sa hauteur). */
+  --pad-x: 5vw;
+  --pad-y: 9vh;
+
+  /* Taille de texte courant : suit la plus petite des deux dimensions
+     pour que les colonnes ne débordent jamais sur un écran bas. */
+  --text: clamp(0.78rem, min(0.98vw, 1.6vh), 1.05rem);
+}
+
+/* ------------------------------------------------------------------
+   2. STRUCTURE DU MAGAZINE
+   ------------------------------------------------------------------ */
+
+/* Sur ordinateur, la page ne défile pas : c'est la « caméra » qui se déplace. */
+@media (min-width: 761px) {
+  html:has(.mag),
+  body:has(.mag) {
+    overflow: hidden;
+    height: 100%;
+  }
+}
+
+/* L'en-tête et le pied de page communs sont masqués sur le magazine. */
+body:has(.mag) .site-header,
+body:has(.mag) .site-footer,
+body:has(.mag) .skip-link:not(:focus) {
+  display: none;
+}
+
+body:has(.mag) main {
+  width: 100%;
+  max-width: none;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.mag,
+.mag * {
+  box-sizing: border-box;
+}
+
+.mag {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  color: var(--ink);
+  background: var(--light);   /* visible autour des pages pendant le recul de la caméra */
+  font-family: var(--sans);
+  font-size: var(--text);
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+/* Remise à zéro des styles généraux à l'intérieur du magazine. */
+.mag h1,
+.mag h2,
+.mag h3,
+.mag p,
+.mag figure,
+.mag ul {
+  margin: 0;
+  padding: 0;
+  max-width: none;
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: inherit;
+}
+
+.mag ul {
+  list-style: none;
+}
+
+.mag a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.mag__viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+/* Le « monde » contient toutes les doubles pages ; c'est lui que le JS déplace. */
+.mag__world {
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+}
+
+/* DOUBLE PAGE — Placée à (colonne × largeur d'écran, ligne × hauteur d'écran). */
+.mag .spread {
+  position: absolute;
+  top: calc(var(--y) * 100vh);
+  left: calc(var(--x) * 100vw);
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  background: var(--white);
+}
+
+@supports (height: 100dvh) {
+  .mag .spread {
+    top: calc(var(--y) * 100dvh);
+    height: 100dvh;
+  }
+}
+
+/* PAGE — Une moitié de double page. */
+.mag .leaf {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  padding: var(--pad-y) var(--pad-x);
+  overflow: hidden;
+}
+
+/* ------------------------------------------------------------------
+   3. BRIQUES COMMUNES
+   ------------------------------------------------------------------ */
+
+/* CADRE PHOTO — Le cadre décide de la taille ; l'image le remplit. */
+.mag .frame {
+  position: relative;
+  overflow: hidden;
+  background: var(--light);
+}
+
+.mag .frame--bleed {
+  position: absolute;
+  inset: 0;
+}
+
+.mag .frame > .media {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+}
+
+.mag .frame > .media--contain {
+  object-fit: contain;
+}
+
+/* Une création en « contain » n'a pas besoin du fond gris derrière elle. */
+.mag .frame:has(> .media--contain) {
+  background: transparent;
+}
+
+/* EMPLACEMENT RÉSERVÉ — Visible tant que le fichier n'est pas déposé. */
+.mag .media--placeholder,
+.mag .frame > .media--placeholder {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 1rem;
+  background: var(--light);
+  color: var(--ink);
+  text-align: center;
+}
+
+.mag .media--placeholder span {
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.mag .media--placeholder small {
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  opacity: 0.6;
+}
+
+/* VIDÉO — Remplit son cadre ; bouton discret pour entendre les commentaires. */
+.mag .media--video video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mag .media__sound {
+  position: absolute;
+  left: 0.6rem;
+  bottom: 0.6rem;
+  padding: 0.35rem 0.7rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--ink);
+  font: 600 0.65rem/1 var(--sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+/* FOLIO — Petite mention en haut de page, comme dans un magazine. */
+.mag .folio,
+.mag .edition,
+.mag .pageno {
+  position: absolute;
+  left: var(--pad-x);
+  top: 3.6vh;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.mag .edition {
+  top: auto;
+  bottom: 3.6vh;
+}
+
+.mag .pageno {
+  top: auto;
+  bottom: 3.6vh;
+}
+
+/* SURTITRE ET LÉGENDE */
+.mag .kicker {
+  margin-bottom: 0.6em;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.mag .caption {
+  margin-top: 0.6rem;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.mag strong {
+  font-weight: 600;
+}
+
+/* Texte réservé aux lecteurs d'écran. */
+.mag .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Lignes ajustées à la largeur de la page par le JS (data-fit). */
+.mag [data-fit] {
+  display: block;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------
+   4. LES 14 DOUBLES PAGES
+   ------------------------------------------------------------------ */
+
+/* 01 — COUVERTURE ------------------------------------------------- */
+/* Composition reprise de ma maquette : une seule grande page, le nom déborde
+   sur le portrait. Positions relevées sur la maquette (en % de la double page). */
+.mag .cover {
+  display: block;
+  background: var(--white);
+}
+
+/* Portrait : moitié droite, pleine hauteur, derrière le nom. */
+.mag .cover__photo {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  right: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: var(--white);
+  color: var(--ink);
+}
+
+.mag .cover__photo > .media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+/* Silhouette dessinée tant que portrait/cover.webp n'est pas déposé. */
+.mag .cover__silhouette {
+  position: absolute;
+  left: 2%;
+  bottom: 0;
+  width: 98%;
+  height: 86%;
+}
+
+/* Bandeau du numéro, en haut de la page gauche. */
+.mag .cover__bar {
+  position: absolute;
+  z-index: 2;
+  top: 3.6vh;
+  left: 6%;
+  right: 52%;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--ink);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Nom + accroche, dans le flux pour ne jamais se chevaucher. */
+.mag .cover__head {
+  position: absolute;
+  z-index: 2;
+  top: 11%;
+  left: 6%;
+}
+
+.mag .cover__name {
+  color: var(--ink);
+}
+
+.mag .cover__first {
+  font-family: var(--serif);
+  font-size: 15vw;             /* secours ; le JS ajuste à 60 % de la largeur */
+  font-weight: 500;
+  line-height: 0.8;
+  letter-spacing: -0.035em;
+}
+
+.mag .cover__last {
+  margin-top: -0.2em;
+  margin-left: -0.03em;
+  font-family: var(--sans);
+  font-size: 12vw;             /* secours ; le JS ajuste à 41 % de la largeur */
+  font-weight: 700;
+  line-height: 0.82;
+  letter-spacing: -0.065em;
+}
+
+.mag .cover__role {
+  margin-top: 7vh;
+  margin-left: 0.4vw;
+}
+
+.mag .cover__new {
+  font-family: var(--serif);
+  font-size: min(3vw, 5vh);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.mag .cover__job {
+  margin-top: 1.2vh;
+  padding-left: 4.2vw;
+  font-size: min(1.55vw, 2.7vh);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+.mag .cover__job span {
+  padding-left: 1.2vw;
+}
+
+/* Accroche en italique fin, alignée à droite. */
+.mag .cover__teaser {
+  position: absolute;
+  z-index: 2;
+  right: 57.4%;
+  bottom: 14%;
+  font-size: min(1.55vw, 2.7vh);
+  font-style: italic;
+  font-weight: 300;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+/* Domaines en Melodrama, en bas à gauche. */
+.mag .cover__domains {
+  position: absolute;
+  z-index: 2;
+  left: 9%;
+  bottom: 7%;
+  font-family: var(--serif);
+  font-size: min(2.5vw, 4.3vh);
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* Code-barres, comme sur une vraie couverture. */
+.mag .cover__barcode {
+  position: absolute;
+  z-index: 2;
+  right: 2.5%;
+  bottom: 11vh;
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.45rem 0.5rem 0.3rem;
+  background: var(--white);
+}
+
+.mag .cover__bars {
+  display: block;
+  width: 5.5rem;
+  height: 2.2rem;
+  background: repeating-linear-gradient(90deg,
+    var(--ink) 0 2px, transparent 2px 4px, var(--ink) 4px 5px, transparent 5px 8px,
+    var(--ink) 8px 11px, transparent 11px 12px, var(--ink) 12px 13px, transparent 13px 16px);
+}
+
+.mag .cover__barcode small {
+  font-size: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-align: center;
+}
+
+/* 02 — CAPS, PRÉSENTATION VIDÉO (maquette « MacBook Air 15 ») ------- */
+/* Positions relevées sur la maquette (1280 × 832), en % de la double page. */
+.mag .caps-video {
+  display: block;
+  background: var(--ink);
+}
+
+.mag .caps-video__media .media--placeholder {
+  background: var(--ink);
+  color: var(--white);
+}
+
+/* La vidéo remplit toute la double page. */
+.mag .caps-video__media video {
+  position: absolute;
+  inset: 0;
+}
+
+/* « CAPS » géant en rose poudré : de 19 % à 62 % de la largeur, en haut. */
+.mag .caps-video__title {
+  position: absolute;
+  z-index: 2;
+  left: 19%;
+  top: 4.5%;
+  font-size: min(18vw, 27.5vh);
+  font-weight: 700;
+  line-height: 0.82;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+  color: var(--powder);
+}
+
+/* Texte blanc en capitales justifiées, à droite du titre. */
+.mag .caps-video__text {
+  position: absolute;
+  z-index: 2;
+  left: 64%;
+  width: 17%;
+  top: 14%;
+  font-size: min(1.15vw, 1.8vh);
+  font-weight: 500;
+  line-height: 1.28;
+  text-align: justify;
+  text-align-last: justify;
+  text-transform: uppercase;
+  color: var(--white);
+  text-shadow: 0 1px 10px rgb(0 0 0 / 0.25);
+}
+
+.mag .caps-video__text strong {
+  font-weight: 700;
+}
+
+/* 03 — CAPS, NUITS DU SPORT (maquette « MacBook Air 10 ») ----------- */
+/* Mesures relevées sur la maquette (page de 640 × 832 px) et converties
+   en % de la page : marges latérales 10 %, photo 81 % de large, etc. */
+.mag .caps__left {
+  padding: 0;
+  background: var(--powder);
+  color: var(--ink);
+}
+
+.mag .caps__top {
+  position: absolute;
+  top: 9.6%;
+  left: 10%;
+  right: 9.7%;
+  display: grid;
+  grid-template-columns: 35.3fr 39.8fr;
+  column-gap: 5.2%;
+  align-items: start;
+}
+
+.mag .caps__title {
+  font-size: min(2.35vw, 3.6vh);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+
+.mag .caps__text {
+  font-size: min(1.1vw, 1.7vh);
+  font-weight: 500;
+  line-height: 1.43;
+  text-align: justify;
+  text-transform: uppercase;
+}
+
+.mag .caps__photo {
+  position: absolute;
+  top: 30.8%;
+  left: 10%;
+  width: 81.1%;
+  height: 38.8%;
+}
+
+.mag .caps__photo .frame {
+  position: absolute;
+  inset: 0;
+}
+
+/* Titre posé sur le bord inférieur de la photo, comme sur la maquette. */
+.mag .caps__photo-title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.06em;
+  z-index: 1;
+  font-size: min(4.85vw, 7.5vh);
+  font-weight: 700;
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--powder);
+  pointer-events: none;
+}
+
+.mag .caps__bottom {
+  position: absolute;
+  top: 74.3%;
+  left: 10%;
+  right: 9.7%;
+  display: grid;
+  grid-template-columns: 31.4fr 33.1fr;
+  column-gap: 15%;
+}
+
+/* PAGE DROITE — Photo de volley encadrée sur fond blanc
+   (de 6,7 % à 93,4 % de la largeur, de 6,9 % à 93,5 % de la hauteur). */
+.mag .volley {
+  padding: 0;
+  background: var(--white);
+}
+
+.mag .volley__photo {
+  position: absolute;
+  top: 6.9%;
+  bottom: 6.5%;
+  left: 6.7%;
+  right: 6.6%;
+}
+
+.mag .volley__photo .frame {
+  position: absolute;
+  inset: 0;
+}
+
+/* Étiquette rose « NUIT DU VOLLEY » posée en haut à gauche de la photo. */
+.mag .volley__label {
+  position: absolute;
+  z-index: 4;
+  top: 10.5%;
+  left: 5.4%;
+  padding: 0.18em 0.28em 0.14em;
+  background: var(--powder);
+  color: var(--ink);
+  font-size: min(3.1vw, 4.8vh);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* DESSIN BALLON — À cheval sur les deux pages, au-dessus de la photo d'équipe.
+   Largeur reprise de la maquette : 153 px sur 1280, soit 12 % de la double page. */
+.mag .caps__ball {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  top: 21%;
+  width: 12%;
+  height: auto;
+  max-width: none;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* 04 — PODCAST (maquette « MacBook Air 14 ») -------------------- */
+/* Positions relevées sur la maquette (1280 × 832), en % de la double page. */
+.mag .podcast {
+  display: block;
+  background: var(--powder);
+}
+
+/* Photo pleine hauteur sur la page gauche. */
+.mag .podcast__photo {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 50%;
+}
+
+/* Page droite rose poudré. */
+.mag .podcast__page {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  right: 0;
+  background: var(--powder);
+}
+
+/* « PODCAST » : deux copies superposées, coupées net au milieu de la double page. */
+.mag .podcast__word {
+  position: absolute;
+  z-index: 2;
+  top: 11.5%;
+  left: 0;
+  right: 0;
+  padding-left: 12.5%;
+  font-size: min(16vw, 30vh);
+  font-weight: 700;
+  line-height: 0.82;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.mag .podcast__word--pink {
+  color: var(--powder);
+  clip-path: inset(-20% 50% -20% 0);
+}
+
+.mag .podcast__word--ink {
+  color: var(--ink);
+  clip-path: inset(-20% 0 -20% 50%);
+}
+
+/* Étiquette rose en haut de la photo, au-dessus de « PODCAST ». */
+.mag .podcast__label {
+  position: absolute;
+  z-index: 2;
+  left: 28.8%;
+  top: 3.4%;
+  padding: 0.42em 0.5em 0.36em;
+  background: var(--powder);
+  color: var(--ink);
+  font-size: min(2.2vw, 3.4vh);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+}
+
+.mag .podcast__title {
+  position: absolute;
+  z-index: 2;
+  left: 57.8%;
+  top: 49.3%;
+  width: 17%;
+  font-size: min(2.35vw, 3.6vh);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+
+.mag .podcast__text {
+  position: absolute;
+  z-index: 2;
+  left: 57.8%;
+  top: 68.5%;
+  width: 19%;
+  font-size: min(1.1vw, 1.7vh);
+  font-weight: 500;
+  line-height: 1.43;
+  text-align: justify;
+  text-transform: uppercase;
+}
+
+/* DESSIN MAINS — En bas à gauche de la photo, coupé par le bas de la page
+   (439 px sur 1280 dans la maquette, soit 34,3 % de la double page). */
+.mag .podcast__hands {
+  position: absolute;
+  z-index: 3;
+  left: 0.4%;
+  bottom: 0;
+  width: 34.3%;
+  height: auto;
+  max-width: none;
+  pointer-events: none;
+}
+
+/* Micro détouré qui pend sous le titre (s'il est déposé). */
+.mag .podcast__mic {
+  position: absolute;
+  z-index: 1;
+  left: 81.2%;
+  top: 35%;
+  height: 56%;
+  width: auto;
+  max-width: none;
+}
+
+/* 05 — TOURNOIS E-SPORT (maquette « MacBook Air 16 ») ------------- */
+.mag .esport__left {
+  background: var(--powder);
+}
+
+.mag .esport__right {
+  padding: 0;
+  background: var(--white);
+}
+
+/* Grand titre sur des bandes roses qui débordent sur la page blanche
+   (« TOURNOIS » jusqu'à 67 % de la largeur, « E-SPORT » jusqu'à 56 %). */
+.mag .esport__title {
+  position: absolute;
+  z-index: 3;
+  top: 7.1%;
+  left: 0;
+  color: var(--ink);
+}
+
+.mag .esport__band {
+  display: block;
+  width: max-content;
+  padding: 0.1em 0.12em 0.04em 6.4vw;
+  background: var(--powder);
+}
+
+.mag .esport__band > span {
+  font-size: min(13.3vw, 20.5vh);
+  font-weight: 700;
+  line-height: 0.82;
+  letter-spacing: -0.055em;
+  text-transform: uppercase;
+}
+
+/* Trait sinueux noir. */
+.mag .esport__line {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.mag .esport__line path {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.55vw;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.mag .esport__subtitle {
+  position: absolute;
+  z-index: 1;
+  left: 12.8%;
+  top: 46%;
+  width: 34%;
+  font-size: min(2.35vw, 3.6vh);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+
+.mag .esport__text {
+  position: absolute;
+  z-index: 1;
+  left: 12.8%;
+  top: 67.3%;
+  width: 32.5%;
+  font-size: min(1.1vw, 1.7vh);
+  font-weight: 600;
+  line-height: 1.43;
+  text-align: justify;
+  text-transform: uppercase;
+}
+
+/* Deux photos sur la page blanche. */
+.mag .esport__frame {
+  position: absolute;
+  left: 7.3%;
+  right: 6.9%;
+}
+
+.mag .esport__frame--1 { top: 10.2%; bottom: 52.3%; }
+.mag .esport__frame--2 { top: 52.4%; bottom: 10.1%; }
+
+/* 06 — VIE AU CAMPUS (maquette « MacBook Air 18 ») --------------- */
+/* Positions relevées sur la maquette (1280 × 832), en % de la double page. */
+.mag .campus {
+  display: block;
+  background: var(--ink);
+}
+
+.mag .campus__media .media--placeholder {
+  background: var(--ink);
+  color: var(--white);
+}
+
+/* « VIE AU / CAMPUS » en rose poudré, en haut à gauche
+   (« CAMPUS » va de 3,7 % à 53,7 % de la largeur). */
+.mag .campus__title {
+  position: absolute;
+  z-index: 2;
+  left: 3.1%;
+  top: 4.4%;
+  color: var(--powder);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.mag .campus__title > span {
+  font-size: min(13vw, 20.5vh);   /* secours ; le JS ajuste les deux lignes ensemble */
+  line-height: 0.73;
+  letter-spacing: -0.055em;
+}
+
+/* Texte blanc en capitales justifiées, à droite du titre. */
+.mag .campus__text {
+  position: absolute;
+  z-index: 2;
+  left: 56.1%;
+  width: 22.3%;
+  top: 22.6%;
+  color: var(--white);
+  font-size: min(1.05vw, 1.62vh);
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: justify;
+  text-transform: uppercase;
+  text-shadow: 0 1px 10px rgb(0 0 0 / 0.3);
+}
+
+.mag .campus__text strong {
+  font-weight: 700;
+}
+
+/* 07 — SPAC (maquette « MacBook Air 19 ») ----------------------- */
+/* Positions relevées sur la maquette (1280 × 832), en % de la double page. */
+.mag .spac {
+  display: block;
+  background: var(--powder);
+}
+
+/* Photo : de 0 à 54,8 % de la largeur, pleine hauteur. */
+.mag .spac__photo {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 54.8%;
+}
+
+.mag .spac__page {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 54.8%;
+  right: 0;
+  background: var(--powder);
+}
+
+/* « SPAC » : de 58,6 % à 96,1 % de la largeur, en haut. */
+.mag .spac__title {
+  position: absolute;
+  z-index: 2;
+  left: 58.4%;
+  top: 6%;
+  color: var(--ink);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.mag .spac__title > span {
+  font-size: min(15vw, 26vh);    /* secours ; le JS ajuste à 37,5 % de la largeur */
+  line-height: 0.82;
+  letter-spacing: -0.05em;
+}
+
+.mag .spac__subtitle {
+  position: absolute;
+  z-index: 2;
+  left: 59.4%;
+  top: 36.2%;
+  width: 14.5%;
+  font-size: min(2.05vw, 3.15vh);
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+
+.mag .spac__text {
+  position: absolute;
+  z-index: 2;
+  left: 75.6%;
+  top: 36.4%;
+  width: 21.1%;
+  font-size: min(1.1vw, 1.7vh);
+  font-weight: 500;
+  line-height: 1.43;
+  text-align: justify;
+  text-transform: uppercase;
+}
+
+.mag .spac__text strong {
+  font-weight: 700;
+}
+
+/* Mascotte : de 57,4 % à 89,3 % de la largeur, coupée par le bas de la page. */
+.mag .spac__mascot {
+  position: absolute;
+  z-index: 1;
+  left: 57.4%;
+  bottom: 0;
+  width: 31.9%;
+  height: auto;
+  max-width: none;
+}
+
+/* ÉTIQUETTE PHOTO — Titre blanc en gras + date, posés sur une photo
+   (Radio Campus, journée portes ouvertes). */
+.mag .photo-tag {
+  position: absolute;
+  z-index: 4;
+  display: flex;
+  align-items: flex-end;
+  gap: 1.2em;
+  color: var(--white);
+  text-shadow: 0 1px 12px rgb(0 0 0 / 0.25);
+}
+
+.mag .photo-tag__title {
+  font-size: min(2.9vw, 4.6vh);
+  font-weight: 700;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+}
+
+.mag .photo-tag__date {
+  padding-bottom: 0.15em;
+  font-size: min(1.1vw, 1.75vh);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* FONDU NOIR — Sur les photos qui portent un texte en bas (conférence Inouï,
+   Radio Campus, journée portes ouvertes) : noir au bord inférieur, qui se
+   dégrade vers le haut pour que le texte blanc reste lisible. */
+.mag .inoui__photo .frame::before,
+.mag .inoui__radio .frame::before,
+.mag .jpo__photo .frame::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 55%;
+  z-index: 2;
+  background: linear-gradient(to top,
+    rgb(0 0 0 / 0.85) 0%,
+    rgb(0 0 0 / 0.55) 30%,
+    rgb(0 0 0 / 0.2) 65%,
+    rgb(0 0 0 / 0) 100%);
+  pointer-events: none;
+}
+
+/* 08 — FESTIVAL INOUÏ (maquette « MacBook Air 12 ») ---------------- */
+.mag .inoui__left {
+  padding: 0;
+  background: var(--white);
+}
+
+/* Photo de conférence : de 7,8 % à 92 % de la largeur, 6,9 % à 93,3 % de la hauteur. */
+.mag .inoui__photo {
+  position: absolute;
+  top: 6.9%;
+  bottom: 6.7%;
+  left: 7.8%;
+  right: 8%;
+}
+
+.mag .inoui__photo .frame {
+  position: absolute;
+  inset: 0;
+}
+
+/* Traits lime qui convergent vers la caméra et débordent sur la page blanche. */
+.mag .inoui__lines {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.mag .inoui__lines path {
+  fill: none;
+  stroke: var(--lime);
+  stroke-width: max(1.5px, 0.2vw);
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Texte blanc en capitales justifiées, en bas de la photo. */
+.mag .inoui__text {
+  position: absolute;
+  z-index: 4;
+  left: 6.1%;
+  width: 52%;
+  bottom: 3.6%;
+  color: var(--white);
+  font-size: min(1.05vw, 1.65vh);
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: justify;
+  text-transform: uppercase;
+  text-shadow: 0 1px 8px rgb(0 0 0 / 0.35);
+}
+
+.mag .inoui__text strong {
+  font-weight: 700;
+}
+
+.mag .inoui__right {
+  padding: 0;
+  background: var(--powder);
+}
+
+.mag .inoui__title {
+  position: absolute;
+  bottom: 60%;               /* le titre s'arrête toujours au-dessus du cadre photo */
+  left: 8.6%;
+  color: var(--ink);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.mag .inoui__festival {
+  font-size: min(7.8vw, 12vh);
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+}
+
+.mag .inoui__name {
+  margin-top: 0.02em;
+  font-size: min(18vw, 27vh);
+  line-height: 0.78;
+  letter-spacing: -0.06em;
+}
+
+/* Photo Radio Campus dans un cadre blanc. */
+.mag .inoui__radio {
+  position: absolute;
+  top: 42.7%;
+  bottom: 6.5%;
+  left: 8.4%;
+  right: 8.7%;
+  padding: 1.6%;
+  background: var(--white);
+}
+
+.mag .inoui__radio .frame {
+  position: absolute;
+  inset: 1.4vw;
+}
+
+.mag .inoui__radio .photo-tag {
+  left: calc(1.4vw + 3%);
+  bottom: calc(1.4vw + 4%);
+}
+
+/* 09 — WEBTV, JOURNÉE PORTES OUVERTES (maquette « MacBook Air 11 ») - */
+.mag .jpo__left {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  row-gap: 4vh;
+  padding: 11vh 8.5% 9vh 8.3%;
+  background: var(--powder);
+}
+
+.mag .jpo__half {
+  min-height: 0;
+}
+
+/* Les citations reprennent le style de la page « À propos » (Melodrama,
+   capitales justifiées) ; deux lignes de la seconde sont plus courtes. */
+.mag .jpo__quote {
+  line-height: 0.93;
+}
+
+.mag .jpo__line--1 { width: 83%; }
+.mag .jpo__line--2 { width: 67%; }
+
+.mag .jpo__right {
+  padding: 0;
+  background: var(--white);
+}
+
+/* Photo : de 6,7 % à 94,4 % de la largeur, de 5 % à 95 % de la hauteur. */
+.mag .jpo__photo {
+  position: absolute;
+  top: 5%;
+  bottom: 5%;
+  left: 6.7%;
+  right: 5.6%;
+}
+
+.mag .jpo__photo .frame {
+  position: absolute;
+  inset: 0;
+}
+
+.mag .jpo__tag {
+  left: 10.7%;
+  bottom: 12%;
+}
+
+/* 10 — AFFICHES --------------------------------------------------- */
+.mag .posters__page {
+  background: var(--white);
+}
+
+.mag .frame--poster {
+  position: absolute;
+  inset: var(--pad-y) 12%;
+}
+
+.mag .posters__page .pageno {
+  left: auto;
+  right: var(--pad-x);
+}
+
+/* 11 — RECHERCHES GRAPHIQUES -------------------------------------- */
+.mag .research__a {
+  position: absolute;
+  inset: var(--pad-y) 10%;
+}
+
+.mag .research__b {
+  position: absolute;
+  left: 8%;
+  top: var(--pad-y);
+  width: 48%;
+  height: 52%;
+}
+
+.mag .research__c {
+  position: absolute;
+  right: 10%;
+  bottom: var(--pad-y);
+  width: 30%;
+  height: 40%;
+}
+
+/* 12 — PHOTOGRAPHIES ---------------------------------------------- */
+.mag .photos__left,
+.mag .photos__right {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 4vh;
+  padding-top: 5vh;
+}
+
+.mag .photos__giant {
+  font-size: 12vw;            /* secours ; le JS ajuste « PHOTO » et « GRAPHIE. » ensemble */
+  font-weight: 700;
+  line-height: 0.78;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.mag .photos__frame {
+  min-height: 0;
+}
+
+.mag .photos__frame--left {
+  width: 72%;
+}
+
+.mag .photos__frame--right {
+  width: 86%;
+  justify-self: end;
+}
+
+/* 13 — À PROPOS (référence lime) --------------------------------- */
+.mag .about__left {
+  padding-top: calc(var(--pad-y) + 1vh);
+  background: var(--lime);
+}
+
+/* Citation : capitales Melodrama, chaque ligne justifiée sur toute la largeur.
+   La taille est calculée en JS (data-fit-block) pour que la ligne la plus longue
+   remplisse exactement la page. */
+.mag .about__quote {
+  display: block;
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 4.2vw;
+  font-weight: 500;
+  line-height: 0.88;
+  letter-spacing: -0.005em;
+  text-transform: uppercase;
+}
+
+.mag .about__line {
+  display: block;
+  text-align: justify;
+  text-align-last: justify;
+}
+
+/* Pendant la mesure, les lignes reprennent leur largeur naturelle. */
+.mag .about__quote.is-measuring .about__line {
+  display: inline-block;
+  text-align: left;
+  text-align-last: auto;
+  white-space: nowrap;
+}
+
+/* Ligne avec la photo : un mot à gauche, la photo au centre, un mot à droite,
+   puis un mot sous le premier (comme « FEEL [photo] SEEN / AS »). */
+.mag .about__row {
+  display: grid;
+  grid-template-columns: max-content 1fr max-content;
+  grid-template-rows: auto auto 1fr;
+  column-gap: 0.3em;
+  margin-block: 0.1em;
+}
+
+.mag .about__word--1 { grid-column: 1; grid-row: 1; }
+.mag .about__word--2 { grid-column: 3; grid-row: 1; text-align: right; }
+.mag .about__word--3 { grid-column: 1; grid-row: 2; }
+
+.mag .about__inline {
+  grid-column: 2;
+  grid-row: 1 / 4;
+  display: block;
+  height: 3.2em;
+  margin-top: 0.08em;
+}
+
+.mag .about__right {
+  background: var(--white);
+}
+
+/* Portrait encadré sur la page blanche, avec le texte en légende dessous. */
+.mag .about__portrait {
+  position: absolute;
+  top: var(--pad-y);
+  left: 12%;
+  right: 12%;
+  bottom: 30%;
+}
+
+.mag .about__portrait .frame {
+  position: absolute;
+  inset: 0;
+}
+
+.mag .about__text {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 6vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2vw;
+  font-size: calc(var(--text) * 0.92);
+  text-align: justify;
+  hyphens: auto;
+}
+
+/* 14 — CONTACT ET SOMMAIRE ---------------------------------------- */
+.mag .contact__left {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 3vh;
+  background: var(--white);
+}
+
+/* Les textes restent au-dessus de la traînée d'images. */
+.mag .contact__left > :not(.trail):not(.folio) {
+  position: relative;
+  z-index: 1;
+}
+
+.mag .contact__links {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5vh;
+}
+
+/* TRAÎNÉE D'IMAGES — Petites photos qui suivent la souris (inspiré de vivmgmt.com). */
+.mag .trail {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.mag .trail img {
+  position: absolute;
+  width: 8.5vw;
+  height: auto;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+}
+
+.mag .contact__title {
+  font-family: var(--serif);
+  font-size: min(9vw, 16vh);
+  font-weight: 500;
+  line-height: 0.85;
+}
+
+.mag .contact__copy {
+  max-width: 26em;
+}
+
+.mag .contact__email {
+  font-size: min(1.8vw, 3vh);
+  font-weight: 600;
+  border-bottom: 2px solid var(--powder);
+  align-self: flex-start;
+}
+
+.mag .contact__todo {
+  align-self: flex-start;
+  padding: 0.4rem 0.7rem;
+  background: var(--light);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.mag .contact__socials {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.mag .contact__right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--powder);
+}
+
+.mag .contact__index {
+  border-bottom: 1px solid var(--ink);
+}
+
+/* Lien vers les mentions légales, discret, en haut à droite de la page rose. */
+.mag .contact__legal {
+  position: absolute;
+  top: 3.6vh;
+  right: var(--pad-x);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+
+.mag .contact__legal:hover,
+.mag .contact__legal:focus-visible {
+  text-decoration: none;
+}
+
+/* Ligne du sommaire : au survol, fond blanc, pas de soulignement, léger glissement. */
+.mag .contact__index a {
+  display: flex;
+  align-items: baseline;
+  gap: 1.2rem;
+  padding: 1.6vh 0.8rem;
+  border-top: 1px solid var(--ink);
+  font-family: var(--serif);
+  font-size: min(2.6vw, 4.6vh);
+  line-height: 1.1;
+  text-decoration: none;
+  transition: background-color 0.25s ease;
+}
+
+.mag .contact__index a > span:first-child {
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  transition: transform 0.3s ease;
+}
+
+.mag .contact__index .arrow {
+  margin-left: auto;
+  font-family: var(--sans);
+  font-size: 1rem;
+}
+
+.mag .contact__index a:hover,
+.mag .contact__index a:focus-visible {
+  background: var(--white);
+  text-decoration: none;
+}
+
+.mag .contact__index a:hover > span:first-child,
+.mag .contact__index a:focus-visible > span:first-child {
+  transform: translateX(0.5rem);
+}
+
+/* ------------------------------------------------------------------
+   5. COMMANDES DE NAVIGATION
+   ------------------------------------------------------------------ */
+.mag__controls {
+  position: absolute;
+  right: 1.2rem;
+  bottom: 1.2rem;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.92);
+  color: #323232;
+  font-family: 'General Sans', sans-serif;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  box-shadow: 0 2px 12px rgb(0 0 0 / 0.08);
+}
+
+.mag__controls button {
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid #323232;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.mag__controls button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.mag__progress {
+  width: 4rem;
+  height: 2px;
+  background: #dedede;
+}
+
+.mag__progress span {
+  display: block;
+  width: 7.14%;
+  height: 100%;
+  background: #323232;
+  transition: width 0.4s ease;
+}
+
+.mag :focus-visible,
+.mag__controls :focus-visible {
+  outline: 2px solid #323232;
+  outline-offset: 3px;
+}
+
+/* ------------------------------------------------------------------
+   ANIMATIONS D'ARRIVÉE (inspirées de vivmgmt.com)
+   Actives seulement si JavaScript tourne et si l'utilisateur n'a pas
+   demandé de réduire les animations (classe .js-anim sur <html>).
+   La classe .is-shown est posée par le JS sur la double page d'arrivée.
+   ------------------------------------------------------------------ */
+.mag .w {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.mag .ch {
+  display: inline-block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* A. Lettres qui sortent d'un flou, l'une après l'autre (data-chars). */
+  .js-anim .mag [data-chars] .ch {
+    opacity: 0;
+    filter: blur(12px);
+    transform: translateY(0.15em);
+    transition:
+      opacity 0.8s ease,
+      filter 0.8s ease,
+      transform 0.8s var(--ease);
+    transition-delay: calc(var(--d, 200ms) + var(--i) * 32ms);
+  }
+
+  .js-anim .mag .is-shown [data-chars] .ch {
+    opacity: 1;
+    filter: blur(0);
+    transform: none;
+  }
+
+  /* B. Lettres qui montent depuis le bas, masquées par la ligne (data-rise). */
+  .js-anim .mag [data-rise] {
+    overflow: hidden;
+    padding-block: 0.12em 0.22em;
+    margin-block: -0.12em -0.22em;
+  }
+
+  .js-anim .mag [data-rise] .ch {
+    transform: translateY(115%);
+    transition: transform 1.1s var(--ease);
+    transition-delay: calc(var(--d, 150ms) + var(--i) * 45ms);
+  }
+
+  .js-anim .mag .is-shown [data-rise] .ch {
+    transform: none;
+  }
+
+  /* C. Blocs qui glissent vers le haut en apparaissant (data-reveal). */
+  .js-anim .mag [data-reveal] {
+    opacity: 0;
+    transform: translateY(26px);
+    transition: opacity 0.9s ease, transform 1s var(--ease);
+    transition-delay: var(--d, 450ms);
+  }
+
+  .js-anim .mag .is-shown [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* D. Aplat de couleur qui se retire et dévoile la photo (data-wipe),
+        pendant que l'image se recadre doucement. */
+  .js-anim .mag [data-wipe]::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    background: var(--wipe, var(--powder));
+    transform-origin: 50% 0%;
+    transition: transform 1s cubic-bezier(0.77, 0, 0.18, 1);
+    transition-delay: var(--d, 250ms);
+    pointer-events: none;
+  }
+
+  .js-anim .mag .is-shown [data-wipe]::after {
+    transform: scaleY(0);
+  }
+
+  .js-anim .mag [data-wipe] > .media,
+  .js-anim .mag [data-wipe] > .cover__silhouette {
+    transform: scale(1.12);
+    transition: transform 1.8s var(--ease);
+    transition-delay: var(--d, 250ms);
+  }
+
+  .js-anim .mag .is-shown [data-wipe] > .media,
+  .js-anim .mag .is-shown [data-wipe] > .cover__silhouette {
+    transform: none;
+  }
+
+  /* E. Trait sinueux (e-sport) : il se dessine à l'arrivée. */
+  .js-anim .mag .esport__line path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 2.2s cubic-bezier(0.65, 0, 0.35, 1) 0.5s;
+  }
+
+  .js-anim .mag .is-shown .esport__line path {
+    stroke-dashoffset: 0;
+  }
+
+  /* F. Traits lime (Festival Inouï) : ils se dessinent l'un après l'autre. */
+  .js-anim .mag .inoui__lines path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 1s cubic-bezier(0.65, 0, 0.35, 1);
+    transition-delay: calc(700ms + var(--i) * 70ms);
+  }
+
+  .js-anim .mag .is-shown .inoui__lines path {
+    stroke-dashoffset: 0;
+  }
+
+  /* G. Ballon dessiné (Nuits du sport) : il arrive en roulant depuis la gauche. */
+  .js-anim .mag .caps__ball {
+    opacity: 0;
+    transform: translateX(calc(-50% - 30vw)) rotate(-360deg);
+    transition: transform 1.6s var(--ease) 0.5s, opacity 0.4s ease 0.5s;
+  }
+
+  .js-anim .mag .is-shown .caps__ball {
+    opacity: 1;
+    transform: translateX(-50%);
+  }
+
+  /* H. Mains dessinées (Podcast) : elles montent depuis le bas de la photo. */
+  .js-anim .mag .podcast__hands {
+    transform: translateY(100%);
+    transition: transform 1.2s var(--ease) 0.9s;
+  }
+
+  .js-anim .mag .is-shown .podcast__hands {
+    transform: none;
+  }
+
+  /* Une page quittée est « rembobinée » instantanément (elle est hors champ). */
+  .js-anim .mag .spread:not(.is-shown) *,
+  .js-anim .mag .spread:not(.is-shown) [data-wipe]::after {
+    transition: none !important;
+  }
+}
+
+/* ------------------------------------------------------------------
+   6. MOBILE (≤ 760 px) — Lecture verticale au doigt.
+   Les doubles pages s'empilent ; chaque page devient pleine largeur.
+   Les compositions en positions absolues repassent dans le flux normal
+   pour qu'aucun bloc ne soit coupé ni invisible.
+   ------------------------------------------------------------------ */
+@media (max-width: 760px) {
+  .mag {
+    --pad-x: 6vw;
+    --pad-y: 3.5rem;
+    --text: 0.95rem;
+    height: auto;
+    overflow: visible;
+  }
+
+  .mag__viewport,
+  .mag__world {
+    position: static;
+    transform: none !important;
+  }
+
+  .mag .spread,
+  .mag .spread[style] {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .mag .leaf {
+    min-height: 0;
+    padding: var(--pad-y) var(--pad-x);
+  }
+
+  /* Couverture : nom, puis portrait, puis accroches. */
+  .mag .spread.cover {
+    display: flex;
+    flex-direction: column;
+    padding: 4.5rem var(--pad-x) 2rem;
+  }
+
+  .mag .cover__bar { left: var(--pad-x); right: var(--pad-x); }
+  .mag .cover__head { position: relative; top: auto; left: auto; }
+  .mag .cover__first { font-size: 21vw; }
+  .mag .cover__last { font-size: 20vw; }
+  .mag .cover__new { font-size: 7vw; }
+  .mag .cover__job { font-size: 4vw; padding-left: 8vw; }
+
+  .mag .cover__photo {
+    position: relative;
+    left: auto;
+    right: auto;
+    order: 3;
+    height: 110vw;
+    margin: 2rem calc(var(--pad-x) * -1) 0;
+  }
+
+  .mag .cover__teaser,
+  .mag .cover__domains {
+    position: relative;
+    inset: auto;
+    margin-top: 1.5rem;
+    order: 2;
+  }
+
+  .mag .cover__teaser { align-self: flex-end; font-size: 4vw; }
+  .mag .cover__domains { font-size: 7vw; }
+  .mag .cover__barcode { bottom: 1rem; }
+
+  /* CAPS, présentation vidéo : format vertical, titre et texte par-dessus. */
+  .mag .caps-video { height: 150vw; }
+  .mag .caps-video__title { left: var(--pad-x); top: 6%; font-size: 30vw; }
+  .mag .caps-video__text {
+    left: var(--pad-x);
+    right: var(--pad-x);
+    width: auto;
+    top: auto;
+    bottom: 8%;
+    font-size: 3.6vw;
+  }
+
+  /* Nuits du sport : même ordre que la maquette, empilé. */
+  .mag .caps__left {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: var(--pad-y) var(--pad-x);
+  }
+
+  .mag .caps__top,
+  .mag .caps__photo,
+  .mag .caps__bottom {
+    position: relative;
+    inset: auto;
+    width: 100%;
+  }
+
+  .mag .caps__top,
+  .mag .caps__bottom {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+
+  .mag .caps__title { font-size: 7.5vw; }
+  .mag .caps__text { font-size: 3.4vw; }
+  .mag .caps__photo { height: 60vw; }
+  .mag .caps__photo-title { font-size: 10vw; }
+  .mag .caps__ball { top: auto; bottom: calc(125vw - 24vw); left: auto; right: var(--pad-x); width: 26vw; transform: none; }
+  .js-anim .mag .caps__ball,
+  .js-anim .mag .is-shown .caps__ball { transform: none; }
+  .mag .volley { height: 125vw; }
+  .mag .volley__label { font-size: 7vw; }
+
+  /* Podcast : photo, puis page rose avec le texte. */
+  .mag .podcast { display: flex; flex-direction: column; }
+  .mag .podcast__photo { position: relative; width: 100%; height: 110vw; }
+  .mag .podcast__page { display: none; }
+  .mag .podcast__word { top: 14vw; padding-left: var(--pad-x); font-size: 21vw; }
+  .mag .podcast__word--pink { clip-path: none; }
+  .mag .podcast__word--ink { display: none; }
+  .mag .podcast__label { left: auto; right: var(--pad-x); top: 3vw; font-size: 4.5vw; }
+
+  .mag .podcast__title,
+  .mag .podcast__text {
+    position: relative;
+    inset: auto;
+    width: auto;
+    margin: 0 var(--pad-x);
+  }
+
+  .mag .podcast__title { margin-top: 2.5rem; font-size: 7.5vw; }
+  .mag .podcast__text { margin-block: 1.2rem 3rem; font-size: 3.4vw; }
+  .mag .podcast__mic { display: none; }
+  .mag .podcast__hands { top: calc(110vw - 31vw); bottom: auto; left: 0; width: 66vw; }
+
+  /* Tournois e-sport : titre, texte, puis les deux photos. */
+  .mag .esport__left {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    padding-top: 0;
+  }
+
+  .mag .esport__band { padding-left: var(--pad-x); }
+  .mag .esport__band > span { font-size: 17vw; }
+  .mag .esport .esport__title { position: absolute; top: 0; }
+  .mag .esport__left { padding-top: 40vw; }
+  .mag .esport__line { display: none; }
+
+  .mag .esport__subtitle,
+  .mag .esport__text {
+    position: relative;
+    inset: auto;
+    width: auto;
+  }
+
+  .mag .esport__subtitle { font-size: 7.5vw; }
+  .mag .esport__text { font-size: 3.4vw; }
+
+  .mag .esport__right {
+    display: grid;
+    gap: 1.5rem;
+    padding: 1.5rem var(--pad-x) 3rem;
+  }
+
+  .mag .esport__frame {
+    position: relative;
+    inset: auto;
+    height: 60vw;
+  }
+
+  /* Vie au campus : format vertical, titre en haut, texte en bas. */
+  .mag .campus { height: 150vw; }
+  .mag .campus__title { left: var(--pad-x); top: 5%; }
+  .mag .campus__title > span { font-size: 18vw; }
+  .mag .campus__text {
+    left: var(--pad-x);
+    right: var(--pad-x);
+    width: auto;
+    top: auto;
+    bottom: 7%;
+    font-size: 3.4vw;
+  }
+
+  /* SPAC : photo, puis page rose avec le texte et la mascotte. */
+  .mag .spac { display: flex; flex-direction: column; }
+  .mag .spac__photo { position: relative; width: 100%; height: 110vw; }
+  .mag .spac__page { display: none; }
+
+  .mag .spac__title,
+  .mag .spac__subtitle,
+  .mag .spac__text {
+    position: relative;
+    inset: auto;
+    width: auto;
+    margin: 0 var(--pad-x);
+  }
+
+  .mag .spac__title { margin-top: 2.5rem; }
+  .mag .spac__title > span { font-size: 30vw; }
+  .mag .spac__subtitle { margin-top: 1.5rem; font-size: 7.5vw; }
+  .mag .spac__text { margin-top: 1.2rem; font-size: 3.4vw; }
+
+  .mag .spac__mascot {
+    position: relative;
+    left: auto;
+    width: 70%;
+    margin: 2rem auto 0;
+  }
+
+  /* Festival Inouï */
+  .mag .inoui__left { height: 125vw; }
+  .mag .inoui__text { width: 88%; font-size: 3.2vw; }
+
+  .mag .inoui__right {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: var(--pad-y) var(--pad-x);
+  }
+
+  .mag .inoui__title { position: relative; inset: auto; }
+  .mag .inoui__festival { font-size: 17vw; }
+  .mag .inoui__name { font-size: 36vw; }
+
+  .mag .inoui__radio {
+    position: relative;
+    inset: auto;
+    height: 75vw;
+  }
+
+  .mag .inoui__radio .frame { inset: 2.5vw; }
+  .mag .inoui__radio .photo-tag { left: 6vw; bottom: 6vw; }
+  .mag .photo-tag__title { font-size: 6vw; }
+  .mag .photo-tag__date { font-size: 3vw; }
+
+  /* Journée portes ouvertes */
+  .mag .jpo__left { display: block; padding: var(--pad-y) var(--pad-x); }
+  .mag .jpo__half + .jpo__half { margin-top: 2.5rem; }
+  .mag .jpo__quote { font-size: 7.4vw; }
+  .mag .jpo__right { height: 135vw; }
+
+  /* Affiches, recherches, photographies */
+  .mag .posters__page,
+  .mag .research__left { height: 120vw; }
+
+  .mag .research__right {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .mag .research__b,
+  .mag .research__c {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: 90vw;
+  }
+
+  .mag .photos__frame { height: 110vw; }
+
+  /* À propos : citation en flux, portrait et texte empilés. */
+  .mag .about__left { gap: 2.5rem; }
+  .mag .about__quote { font-size: 8.4vw; }
+
+  .mag .about__portrait,
+  .mag .about__text {
+    position: relative;
+    inset: auto;
+  }
+
+  .mag .about__portrait { height: 110vw; margin-bottom: 1.5rem; }
+  .mag .about__text { grid-template-columns: 1fr; gap: 1.2rem; }
+
+  /* Contact */
+  .mag .contact__left { gap: 2.5rem; }
+  .mag .contact__title { font-size: 20vw; }
+  .mag .contact__index a { font-size: 7vw; }
+  .mag .contact__email { font-size: 5vw; }
+  .mag .contact__right { padding-block: 3rem; }
+
+  .mag__controls {
+    display: none;
+  }
+}

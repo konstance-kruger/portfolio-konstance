@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.astro/
+.DS_Store
+.env
+.env.*
+*.log
+
+# Copies de sécurité des images avant compression (16/11/2026)
+_originaux-images/

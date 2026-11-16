@@ -1,0 +1,22 @@
+/* EN-TÊTE — Répartit le nom et les liens de navigation. */
+.site-header { padding: 1.5rem 5%; display: flex; justify-content: space-between; align-items: center; gap: 2rem; border-bottom: 1px solid; }
+.brand { font-weight: 800; text-decoration: none; }
+.brand span { display: block; font-size: .8rem; }
+.menu { display: flex; gap: 1.2rem; flex-wrap: wrap; }
+/* REPÈRES — Distingue les catégories et les éléments à compléter. */
+.eyebrow { text-transform: uppercase; font-size: .8rem; letter-spacing: .12em; }
+.note { padding: 1rem; background: var(--pink); }
+.button, .menu-toggle { display: inline-block; background: var(--lime); color: var(--ink); border: 1px solid; padding: .8rem 1.2rem; font: inherit; }
+/* ACCÈS RAPIDE — Cache le raccourci jusqu’à sa sélection au clavier. */
+.skip-link { position: absolute; top: -100px; left: 1rem; padding: 1rem; background: var(--lime); }
+.skip-link:focus { top: 1rem; z-index: 10; }
+/* MOBILE — Affiche le menu repliable uniquement lorsque JavaScript est disponible. */
+[hidden] { display: none !important; }
+@media (max-width: 760px) {
+ .site-header { flex-wrap: wrap; }
+ #navigation { width: 100%; }
+ .menu { flex-direction: column; width: 100%; }
+ .js #navigation:not(.is-open) { display: none; }
+}
+/* ORDINATEUR — Conserve la navigation visible et masque le bouton mobile. */
+@media (min-width: 761px) { .menu-toggle { display: none; } }

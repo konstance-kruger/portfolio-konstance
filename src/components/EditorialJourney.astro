@@ -1,0 +1,648 @@
+---
+// MAGAZINE — Les doubles pages du portfolio (14 avec le chapitre « Créer », 11 sans).
+// Chaque <article data-scene> est une double page plein écran, placée dans un
+// espace en 2 dimensions grâce aux variables CSS --x (colonne) et --y (ligne).
+// Le script editorial-journey.js déplace la « caméra » d'une double page à l'autre
+// et déclenche les animations d'arrivée.
+//
+// ATTRIBUTS D'ANIMATION (rejoués à chaque arrivée sur une double page) :
+// - data-chars  : le texte apparaît lettre par lettre, en sortant d'un flou
+// - data-rise   : les lettres montent depuis le bas (grands titres bâton)
+// - data-reveal : le bloc glisse légèrement vers le haut en apparaissant
+// - data-wipe   : un aplat de couleur se retire et dévoile la photo
+// - style="--d:…" : délai avant l'animation
+import { existsSync } from 'node:fs';
+import nodePath from 'node:path';
+import Media from './Media.astro';
+import { profile } from '../data/profile.js';
+
+// Vérifie au build si une image existe dans public/assets/images/.
+const exists = (file: string) =>
+  existsSync(nodePath.join(process.cwd(), 'public/assets/images', file));
+
+// CHAPITRE « CRÉER » — Affiché seulement quand au moins une création est déposée
+// dans public/assets/images/creations/. Sinon, le magazine passe directement de
+// « Rassembler » à « Me rencontrer » (pas de pages vides en ligne).
+const creationFiles = [
+  'creations/creation-01.webp', 'creations/creation-02.webp', 'creations/creation-03.webp',
+  'creations/creation-04.webp', 'creations/creation-05.webp',
+  'creations/photo-01.webp', 'creations/photo-02.webp',
+];
+const showCreer = creationFiles.some(exists);
+
+// PARCOURS — [colonne, ligne] de chaque double page.
+// On descend dans un chapitre, on se décale à droite au chapitre suivant.
+//   Ouverture (1)     : [0,0]
+//   Produire (4)      : [1,0] [1,1] [1,2] [1,3]
+//   Rassembler (4)    : [2,3] [2,4] [2,5] [2,6]
+//   Créer (3)         : [3,6] [3,7] [3,8]            (seulement si showCreer)
+//   Me rencontrer (2) : colonne suivante, à partir de la dernière ligne
+const path = [
+  [0, 0],
+  [1, 0], [1, 1], [1, 2], [1, 3],
+  [2, 3], [2, 4], [2, 5], [2, 6],
+  ...(showCreer
+    ? [[3, 6], [3, 7], [3, 8], [4, 8], [4, 9]]
+    : [[3, 6], [3, 7]]),
+];
+const total = path.length;
+
+// Numéros des doubles pages qui dépendent du chapitre « Créer ».
+const iAffiches = 9;
+const iAbout = showCreer ? 12 : 9;
+const iContact = iAbout + 1;
+const chapMeet = showCreer ? '05' : '04';
+
+const place = (n: number) => `--x:${path[n][0]};--y:${path[n][1]}`;
+const two = (n: number) => String(n).padStart(2, '0');
+
+// COUVERTURE — Portrait de couverture (sinon, une silhouette dessinée).
+const coverFile = 'portrait/cover.webp';
+const coverExists = exists(coverFile);
+
+// TRAÎNÉE D'IMAGES (page Contact) — uniquement des photos réelles déjà présentes.
+const trailImages = [
+  'caps/caps-cover.webp',
+  'caps/nuit-du-sport-cover.webp',
+  'caps/nuit-du-sport-coulisses.webp',
+  'caps/podcast-coulisses.webp',
+  'campus/vie-au-campus.webp',
+  'webtv/jpo.webp',
+  'inoui/conference.webp',
+  'inoui/radio-campus.webp',
+  'creations/photo-01.webp',
+  'creations/photo-02.webp',
+  'creations/creation-01.webp',
+  'creations/creation-02.webp',
+].filter(exists).map((file) => `/assets/images/${file}`);
+
+// SPAC — Mascotte détourée (PNG transparent) : affichée seulement si elle est déposée.
+const mascotFile = 'spac/mascotte.png';
+const mascotExists = exists(mascotFile);
+
+// DESSINS — Mes dessins détourés (PNG transparents), affichés s'ils sont présents.
+const ballFile = 'caps/dessin-ballon.png';
+const ballExists = exists(ballFile);
+const handsFile = 'caps/dessin-podcast.png';
+const handsExists = exists(handsFile);
+
+// PODCAST — Micro détouré (PNG transparent) : affiché seulement s'il est déposé.
+const micFile = 'caps/podcast-micro.png';
+const micExists = exists(micFile);
+---
+
+<section class="mag" data-mag aria-label="Portfolio de Konstance Kruger">
+  <div class="mag__viewport" data-viewport>
+    <div class="mag__world" data-world>
+
+      <!-- ======================================================
+           CHAPITRE 01 — OUVERTURE
+           ====================================================== -->
+
+      <!-- 01 / COUVERTURE — Composition de ma maquette : nom géant qui déborde sur le portrait. -->
+      <article id="couverture" class="spread cover" data-scene style={place(0)} aria-label="01 — Couverture">
+
+        <!-- PORTRAIT — Moitié droite, pleine hauteur, derrière le nom. -->
+        <div class="cover__photo" data-wipe style="--d:150ms">
+          {coverExists ? (
+            <img class="media" src={`/assets/images/${coverFile}`} alt="Portrait de Konstance Kruger" />
+          ) : (
+            <svg class="cover__silhouette" viewBox="0 0 500 560" preserveAspectRatio="xMidYMax meet" role="img" aria-label="Emplacement du portrait (portrait/cover.webp)">
+              <path d="M5 560 C 10 470 25 360 70 300 C 110 255 160 250 180 238 C 192 222 190 205 178 185 C 158 160 152 120 156 85 C 162 30 205 0 262 0 C 330 0 368 45 368 110 C 368 150 352 185 340 205 C 335 222 342 240 368 252 C 420 270 470 275 500 285" fill="none" stroke="currentColor" stroke-width="1.3" />
+            </svg>
+          )}
+        </div>
+
+        <!-- BANDEAU — Informations de numéro, comme en haut d'une couverture. -->
+        <header class="cover__bar" data-reveal style="--d:900ms">
+          <span>N°01 — Novembre 2026</span>
+          <span>Édition portfolio</span>
+          <span>BUT MMI — 2<sup>e</sup> année</span>
+        </header>
+
+        <!-- NOM ET ACCROCHE -->
+        <div class="cover__head">
+          <h1 class="cover__name" aria-label="Konstance Kruger">
+            <span class="cover__first" data-fit data-fit-width="0.6" data-fit-max-vh="34" data-chars style="--d:250ms">konstance</span>
+            <span class="cover__last" data-fit data-fit-width="0.41" data-fit-max-vh="27" data-rise style="--d:650ms">kruger</span>
+          </h1>
+
+          <div class="cover__role" data-reveal style="--d:1100ms">
+            <p class="cover__new">Ta nouvelle</p>
+            <p class="cover__job">Cheffe de projet<br /><span>Creative producer</span></p>
+          </div>
+        </div>
+
+        <p class="cover__teaser" data-reveal style="--d:1300ms">
+          Tout sur ses<br />derniers<br />projets<br />depuis 2026
+        </p>
+
+        <ul class="cover__domains" data-reveal style="--d:1450ms">
+          <li>Audiovisuel</li>
+          <li>Événementiel</li>
+          <li>Communication</li>
+          <li>Design graphique</li>
+        </ul>
+
+        <!-- CODE-BARRES — Détail de couverture, dessiné en CSS. -->
+        <div class="cover__barcode" aria-hidden="true" data-reveal style="--d:1600ms">
+          <span class="cover__bars"></span>
+          <small>N°01 — 2026</small>
+        </div>
+      </article>
+
+      <!-- ======================================================
+           CHAPITRE 02 — PRODUIRE (CAPS)
+           ====================================================== -->
+
+      <!-- 02 / CAPS — PRÉSENTATION VIDÉO (maquette « MacBook Air 15 ») :
+           vidéo d'ambiance pleine double page (muette, en boucle, en pause hors de la page),
+           « CAPS » géant rose, texte blanc justifié à droite. -->
+      <article id="caps" class="spread caps-video" data-scene style={place(1)} aria-label="02 — CAPS, présentation">
+        <div class="frame frame--bleed caps-video__media" data-wipe style="--wipe:var(--ink);--d:100ms">
+          <Media
+            bare
+            file="caps/caps-presentation.webp"
+            video="caps-presentation.mp4"
+            sound={false}
+            alt="Vidéo de présentation de CAPS"
+            label="Vidéo de présentation CAPS"
+          />
+        </div>
+
+        <h2 class="caps-video__title" data-rise style="--d:500ms">CAPS</h2>
+
+        <p class="caps-video__text" data-reveal style="--d:1000ms">
+          Est une association étudiante fondée en janvier 2026 pour créer
+          des <strong>contenus audiovisuels et événementiels.</strong>
+        </p>
+      </article>
+
+      <!-- 03 / NUITS DU SPORT (maquette « MacBook Air 10 ») :
+           page rose avec la photo d'équipe, photo de volley encadrée sur la page blanche. -->
+      <article id="sport" class="spread caps" data-scene style={place(2)} aria-label="03 — CAPS, les Nuits du sport">
+        <div class="leaf caps__left">
+          <!-- Haut de page : titre à gauche, texte à droite. -->
+          <div class="caps__top" data-reveal style="--d:200ms">
+            <h2 class="caps__title">
+              CAPS&nbsp;: un<br />
+              mélange<br />
+              d’audiovisuel&nbsp;&amp;<br />
+              de cohésion<br />
+              d’équipe
+            </h2>
+
+            <p class="caps__text">
+              Nous avons pu mettre en place des «&nbsp;Nuits du sport&nbsp;». Le principe est
+              celui de mettre en place un live sur Twitch du tournoi avec des commentaires,
+              comme si les joueurs étaient de vrais professionnels.
+            </p>
+          </div>
+
+          <!-- Photo d'équipe, avec le titre posé sur son bord inférieur. -->
+          <figure class="caps__photo">
+            <div class="frame" data-wipe style="--d:350ms">
+              <Media bare file="caps/caps-equipe.webp" alt="L'équipe CAPS réunie dans le gymnase lors de la Nuit du futsal" label="Équipe CAPS" />
+            </div>
+            <figcaption class="caps__photo-title" data-rise style="--d:900ms">Nuit du futsal</figcaption>
+          </figure>
+
+          <!-- Bas de page : deux colonnes. -->
+          <div class="caps__bottom" data-reveal style="--d:1100ms">
+            <p class="caps__text">
+              Cette photo est tirée de notre premier live. Après plusieurs heures
+              d’installation, j’ai pu animer et commenter le live de 18&nbsp;h à 00&nbsp;h.
+            </p>
+
+            <p class="caps__text">
+              Nous avons pu faire un live sur du futsal, mais également avec du volley. Ces
+              diffusions permettent aux joueurs de garder un moment divertissant de cet
+              événement.
+            </p>
+          </div>
+        </div>
+
+        <!-- DESSIN — Mon ballon enflammé, à cheval sur les deux pages ;
+             il arrive en roulant depuis la gauche. -->
+        {ballExists && (
+          <img class="caps__ball" src={`/assets/images/${ballFile}`} alt="" aria-hidden="true" />
+        )}
+
+        <!-- PAGE DROITE — Photo de volley encadrée, étiquette rose en haut à gauche. -->
+        <div class="leaf volley">
+          <figure class="volley__photo">
+            <div class="frame" data-wipe style="--wipe:var(--white);--d:250ms">
+              <Media bare file="caps/nuit-du-sport-cover.webp" alt="Un joueur smashe au filet pendant la Nuit du volley" label="Nuit du volley" />
+            </div>
+            <figcaption class="volley__label" data-reveal style="--d:900ms">Nuit du volley</figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <!-- 04 / PODCAST (maquette « MacBook Air 14 ») :
+           photo à gauche, page rose à droite, « PODCAST » sur les deux pages
+           (rose sur la photo, gris foncé sur la page rose). -->
+      <article id="podcast" class="spread podcast" data-scene style={place(3)} aria-label="04 — CAPS, les podcasts">
+        <div class="podcast__photo frame" data-wipe style="--wipe:var(--powder);--d:100ms">
+          <Media
+            bare
+            file="caps/podcast-cover.webp"
+            video="podcast.mp4"
+            alt="L'équipe CAPS pendant l'enregistrement d'un podcast"
+            label="Podcast — équipe"
+          />
+        </div>
+        <div class="podcast__page" aria-hidden="true"></div>
+
+        <!-- DESSIN — Mes mains qui filment avec un téléphone, en bas de la photo. -->
+        {handsExists && (
+          <img class="podcast__hands" src={`/assets/images/${handsFile}`} alt="" aria-hidden="true" />
+        )}
+
+        <!-- Le mot est affiché deux fois, exactement au même endroit :
+             la copie rose n'est visible que sur la page gauche, la grise que sur la droite. -->
+        <h2 class="podcast__word podcast__word--pink" aria-label="Podcast" data-fit="podcast" data-fit-width="0.852" data-fit-max-vh="30" data-rise style="--d:400ms">Podcast</h2>
+        <span class="podcast__word podcast__word--ink" aria-hidden="true" data-fit="podcast" data-fit-width="0.852" data-fit-max-vh="30" data-rise style="--d:400ms">Podcast</span>
+
+        <p class="podcast__label" data-reveal style="--d:1000ms">Caps’zzz night</p>
+
+        <h3 class="podcast__title" data-reveal style="--d:800ms">
+          CAPS&nbsp;: c’est<br />avant tout un<br />plaisir de<br />tourner
+        </h3>
+
+        <p class="podcast__text" data-reveal style="--d:950ms">
+          Nous souhaitions faire des lives plus détendus, qui permettent de s’exprimer en
+          public et qui ont une organisation plus simple, pour davantage profiter.
+        </p>
+
+        {micExists && (
+          <img class="podcast__mic" src={`/assets/images/${micFile}`} alt="" aria-hidden="true" data-reveal style="--d:700ms" />
+        )}
+      </article>
+
+      <!-- 05 / TOURNOIS E-SPORT (maquette « MacBook Air 16 ») :
+           page rose avec le grand titre sur fond rose qui déborde sur la page blanche,
+           trait sinueux, deux photos à droite. -->
+      <article id="esport" class="spread esport" data-scene style={place(4)} aria-label="05 — CAPS, les tournois e-sport">
+        <div class="leaf esport__left">
+          <!-- TRAIT — Ligne sinueuse dessinée en SVG ; elle se trace à l'arrivée. -->
+          <svg class="esport__line" viewBox="0 0 640 832" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M455 355 C 430 390, 405 440, 470 465 C 540 490, 600 500, 610 575 C 620 650, 540 690, 470 690 C 410 690, 380 660, 395 625 C 410 590, 480 590, 500 640 C 525 700, 480 770, 380 778 C 300 784, 230 750, 180 762 C 150 770, 140 800, 145 832" pathLength="1" />
+          </svg>
+
+          <h3 class="esport__subtitle" data-reveal style="--d:800ms">
+            CAPS&nbsp;: on<br />organise des<br />événements<br />qu’on nous<br />réclame
+          </h3>
+
+          <p class="esport__text" data-reveal style="--d:950ms">
+            Rassembler et divertir via le matériel e-sport à disposition dans notre
+            département en MMI.
+          </p>
+        </div>
+
+        <div class="leaf esport__right">
+          <div class="esport__frame esport__frame--1 frame" data-wipe style="--wipe:var(--white);--d:350ms">
+            <Media
+              bare
+              file="caps/esport-cover.webp"
+              video="esport.mp4"
+              alt="Un tournoi e-sport organisé par CAPS"
+              label="Tournoi e-sport 1"
+            />
+          </div>
+          <div class="esport__frame esport__frame--2 frame" data-wipe style="--wipe:var(--white);--d:550ms">
+            <Media bare file="caps/esport-regie.webp" alt="La régie pendant un tournoi e-sport" label="Tournoi e-sport 2" />
+          </div>
+        </div>
+
+        <!-- TITRE — Posé sur des bandes roses qui débordent sur la page blanche. -->
+        <h2 class="esport__title" aria-label="Tournois e-sport">
+          <span class="esport__band"><span data-fit="esport" data-fit-width="0.596" data-fit-max-vh="21" data-rise style="--d:250ms">Tournois</span></span>
+          <span class="esport__band"><span data-fit="esport" data-fit-width="0.483" data-fit-max-vh="21" data-rise style="--d:400ms">E-sport</span></span>
+        </h2>
+      </article>
+
+      <!-- ======================================================
+           CHAPITRE 03 — RASSEMBLER (Vie au campus, SPAC, Festival Inouï, WebTV)
+           ====================================================== -->
+
+      <!-- 06 / VIE AU CAMPUS (maquette « MacBook Air 18 ») :
+           photo noir et blanc sur toute la double page, « VIE AU CAMPUS » en rose poudré,
+           texte blanc justifié à droite du titre. -->
+      <article id="campus" class="spread campus" data-scene style={place(5)} aria-label="06 — Rassembler, la vie au campus">
+        <div class="frame frame--bleed campus__media" data-wipe style="--wipe:var(--ink);--d:100ms">
+          <Media bare file="campus/vie-au-campus.webp" alt="Des étudiants réunis sous un préau du campus pendant un événement" label="Vie au campus" />
+        </div>
+
+        <h2 class="campus__title" aria-label="Vie au campus">
+          <span data-fit="campus" data-fit-width="0.346" data-fit-max-vh="21" data-rise style="--d:400ms">Vie au</span>
+          <span data-fit="campus" data-fit-width="0.499" data-fit-max-vh="21" data-rise style="--d:550ms">Campus</span>
+        </h2>
+
+        <p class="campus__text" data-reveal style="--d:1000ms">
+          Mon objectif est d’aider ma filière à se rassembler mais aussi le campus. Dynamiser
+          notre IUT me paraît primordial pour que nous puissions <strong>partager de belles années.</strong>
+        </p>
+      </article>
+
+      <!-- 07 / SPAC (maquette « MacBook Air 19 ») :
+           photo noir et blanc à gauche (un peu plus large que la moitié), page rose à droite
+           avec le titre, le sous-titre, le texte et la mascotte en bas. -->
+      <article id="spac" class="spread spac" data-scene style={place(6)} aria-label="07 — SPAC, le BDE MMI">
+        <div class="spac__photo frame" data-wipe style="--wipe:var(--powder);--d:100ms">
+          <Media bare file="spac/spac-photo.webp" alt="Deux membres de SPAC posent avec une pancarte en carton SPAC au festival de rentrée" label="Photo SPAC" />
+        </div>
+        <div class="spac__page" aria-hidden="true"></div>
+
+        <h2 class="spac__title" aria-label="SPAC">
+          <span data-fit="spac" data-fit-width="0.375" data-fit-max-vh="26" data-rise style="--d:350ms">SPAC</span>
+        </h2>
+
+        <h3 class="spac__subtitle" data-reveal style="--d:800ms">
+          SPAC&nbsp;: les<br />capseurs<br />décident de<br />reprendre<br />le BDE MMI
+        </h3>
+
+        <p class="spac__text" data-reveal style="--d:950ms">
+          Est le BDE dans lequel je suis vice-présidente. Nous cherchons à réellement
+          dynamiser notre filière, voire notre campus, et pas seulement avec des soirées mais
+          des événements qui peuvent <strong>tous nous rassembler.</strong> Et j’y suis vice-présidente.
+        </p>
+
+        <!-- MASCOTTE — PNG transparent, posé en bas de la page rose (affiché s'il est déposé). -->
+        {mascotExists && (
+          <img class="spac__mascot" src={`/assets/images/${mascotFile}`} alt="La mascotte de SPAC qui fait coucou" data-reveal style="--d:1100ms" />
+        )}
+      </article>
+
+      <!-- 08 / FESTIVAL INOUÏ (maquette « MacBook Air 12 ») :
+           photo de conférence encadrée à gauche avec texte blanc, page rose à droite
+           avec le titre et la photo Radio Campus en cadre blanc. -->
+      <article id="inoui" class="spread inoui" data-scene style={place(7)} aria-label="08 — Festival Inouï">
+        <div class="leaf inoui__left">
+          <!-- TRAITS LIME — Lignes qui convergent vers la caméra ; elles débordent sur la
+               page blanche et se dessinent à l'arrivée (positions relevées sur la maquette). -->
+          <svg class="inoui__lines" viewBox="0 0 640 832" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M7 192 C 150 230, 270 280, 377 305" pathLength="1" style="--i:0" />
+            <path d="M42 232 L 175 275" pathLength="1" style="--i:1" />
+            <path d="M0 279 L 152 290" pathLength="1" style="--i:2" />
+            <path d="M10 322 L 129 321" pathLength="1" style="--i:3" />
+            <path d="M150 314 L 304 318" pathLength="1" style="--i:4" />
+            <path d="M207 294 L 292 302" pathLength="1" style="--i:5" />
+            <path d="M325 317 L 350 316" pathLength="1" style="--i:6" />
+            <path d="M197 340 L 280 336" pathLength="1" style="--i:7" />
+            <path d="M17 382 L 159 351" pathLength="1" style="--i:8" />
+            <path d="M0 445 C 60 405, 120 375, 185 361" pathLength="1" style="--i:9" />
+            <path d="M10 490 L 87 432" pathLength="1" style="--i:10" />
+            <path d="M0 552 C 100 450, 200 385, 377 319" pathLength="1" style="--i:11" />
+          </svg>
+
+          <figure class="inoui__photo">
+            <div class="frame" data-wipe style="--wipe:var(--white);--d:200ms">
+              <Media bare file="inoui/conference.webp" alt="Le tournage d'une conférence du Festival Inouï dans un amphithéâtre" label="Festival Inouï — conférence" />
+            </div>
+            <figcaption class="inoui__text" data-reveal style="--d:1000ms">
+              Est un événement dédié à <strong>l’innovation &amp; aux technologies</strong> où
+              j’ai participé en filmant des conférences et en tant qu’animatrice pour la WebTV.
+            </figcaption>
+          </figure>
+        </div>
+
+        <div class="leaf inoui__right">
+          <h2 class="inoui__title" aria-label="Festival Inouï">
+            <span class="inoui__festival" data-fit="inoui-1" data-fit-width="0.303" data-fit-max-vh="12" data-rise style="--d:300ms">Festival</span>
+            <span class="inoui__name" data-fit="inoui-2" data-fit-width="0.412" data-fit-max-vh="24" data-rise style="--d:450ms">Inoui</span>
+          </h2>
+
+          <figure class="inoui__radio">
+            <div class="frame" data-wipe style="--wipe:var(--powder);--d:600ms">
+              <Media bare file="inoui/radio-campus.webp" alt="Le studio de Radio Campus pendant le Festival Inouï" label="Radio Campus" />
+            </div>
+            <figcaption class="photo-tag" data-reveal style="--d:1100ms">
+              <span class="photo-tag__title">Radio Campus</span>
+              <span class="photo-tag__date">30 mai 2026</span>
+            </figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <!-- 09 / WEBTV, JOURNÉE PORTES OUVERTES (maquette « MacBook Air 11 ») :
+           deux citations en Melodrama sur la page rose, photo encadrée à droite. -->
+      <article id="webtv" class="spread jpo" data-scene style={place(8)} aria-label="09 — WebTV, journée portes ouvertes">
+        <div class="leaf jpo__left">
+          <!-- Mêmes lignes que la maquette (y compris la coupure « M’ÉPANOUISS-ANT »). -->
+          <!-- Chaque citation occupe une moitié de page : le JS l'ajuste à cette moitié. -->
+          <div class="jpo__half">
+          <blockquote class="about__quote jpo__quote" data-fit-block>
+            <span class="about__line" data-reveal style="--d:150ms">“ Je cherche à me</span>
+            <span class="about__line" data-reveal style="--d:220ms">créer de l’expérience</span>
+            <span class="about__line" data-reveal style="--d:290ms">tout en m’épanouiss</span>
+            <span class="about__line" data-reveal style="--d:360ms">-ant dans le monde</span>
+            <span class="about__line" data-reveal style="--d:430ms">professionnel. ”</span>
+          </blockquote>
+          </div>
+
+          <div class="jpo__half">
+          <blockquote class="about__quote jpo__quote" data-fit-block>
+            <span class="about__line jpo__line--1" data-reveal style="--d:600ms">“ C’est pour cela</span>
+            <span class="about__line jpo__line--2" data-reveal style="--d:670ms">que je saisis</span>
+            <span class="about__line" data-reveal style="--d:740ms">chaque opportunité</span>
+            <span class="about__line" data-reveal style="--d:810ms">qui s’offre à moi. ”</span>
+          </blockquote>
+          </div>
+        </div>
+
+        <div class="leaf jpo__right">
+          <figure class="jpo__photo">
+            <div class="frame" data-wipe style="--wipe:var(--white);--d:250ms">
+              <Media bare file="webtv/jpo.webp" alt="Konstance sur le plateau de la WebTV pendant la journée portes ouvertes" label="Journée portes ouvertes" />
+            </div>
+            <figcaption class="photo-tag jpo__tag" data-reveal style="--d:1000ms">
+              <span class="photo-tag__title">Journée portes<br />ouvertes</span>
+              <span class="photo-tag__date">26 janv 2026</span>
+            </figcaption>
+          </figure>
+        </div>
+      </article>
+
+      {showCreer && (
+      <Fragment>
+      <!-- ======================================================
+           CHAPITRE 04 — CRÉER (sans articles : les travaux parlent d'eux-mêmes)
+           ====================================================== -->
+
+      <!-- 10 / AFFICHES — Une affiche par page. -->
+      <article id="affiches" class="spread posters" data-scene style={place(iAffiches)} aria-label="10 — Affiches">
+        <div class="leaf posters__page">
+          <div class="frame frame--poster" data-wipe style="--wipe:var(--white);--d:200ms">
+            <Media bare fit="contain" file="creations/creation-01.webp" alt="Affiche personnelle 1" label="Affiche 01" />
+          </div>
+          <span class="pageno">01</span>
+        </div>
+
+        <div class="leaf posters__page">
+          <div class="frame frame--poster" data-wipe style="--wipe:var(--white);--d:450ms">
+            <Media bare fit="contain" file="creations/creation-02.webp" alt="Affiche personnelle 2" label="Affiche 02" />
+          </div>
+          <span class="pageno">02</span>
+        </div>
+      </article>
+
+      <!-- 11 / RECHERCHES GRAPHIQUES — Galerie éditoriale de 3 formats différents. -->
+      <article id="recherches" class="spread research" data-scene style={place(iAffiches + 1)} aria-label="11 — Recherches graphiques">
+        <div class="leaf research__left">
+          <div class="frame research__a" data-wipe style="--wipe:var(--white);--d:200ms">
+            <Media bare fit="contain" file="creations/creation-03.webp" alt="Recherche graphique 3" label="Création 03" />
+          </div>
+        </div>
+
+        <div class="leaf research__right">
+          <div class="frame research__b" data-wipe style="--wipe:var(--white);--d:400ms">
+            <Media bare fit="contain" file="creations/creation-04.webp" alt="Recherche graphique 4" label="Création 04" />
+          </div>
+          <div class="frame research__c" data-wipe style="--wipe:var(--white);--d:600ms">
+            <Media bare fit="contain" file="creations/creation-05.webp" alt="Recherche graphique 5" label="Création 05" />
+          </div>
+        </div>
+      </article>
+
+      <!-- 12 / PHOTOGRAPHIES — Très grande typographie, une photo par page. -->
+      <article id="photographies" class="spread photos" data-scene style={place(iAffiches + 2)} aria-label="12 — Photographies">
+        <div class="leaf photos__left">
+          <h2 class="photos__giant" aria-label="Photographie" data-fit="photo" data-rise>Photo</h2>
+          <div class="frame photos__frame photos__frame--left" data-wipe style="--d:450ms">
+            <Media bare file="creations/photo-02.webp" alt="Photographie personnelle 2" label="Photo 02" />
+          </div>
+        </div>
+
+        <div class="leaf photos__right">
+          <span class="photos__giant photos__giant--right" aria-hidden="true" data-fit="photo" data-rise style="--d:400ms">graphie.</span>
+          <div class="frame photos__frame photos__frame--right" data-wipe style="--d:650ms">
+            <Media bare file="creations/photo-01.webp" alt="Photographie personnelle 1" label="Photo 01" />
+          </div>
+        </div>
+      </article>
+      </Fragment>
+      )}
+
+      <!-- ======================================================
+           CHAPITRE 05 (ou 04 sans « Créer ») — ME RENCONTRER
+           ====================================================== -->
+
+      <!-- 13 / À PROPOS — Inspirée de la référence lime : grande citation en capitales,
+           photo insérée au milieu du texte, portrait encadré sur la page blanche. -->
+      <article id="apropos" class="spread about" data-scene style={place(iAbout)} aria-label={`${two(iAbout + 1)} — À propos`}>
+        <div class="leaf about__left">
+          <span class="folio">{chapMeet} — Me rencontrer</span>
+
+          <!-- CITATION — Chaque ligne est justifiée sur toute la largeur ;
+               la photo s'insère entre les mots, comme dans la référence. -->
+          <blockquote class="about__quote" data-fit-block>
+            <span class="about__line" data-reveal style="--d:150ms">« J’aime quand</span>
+            <span class="about__line" data-reveal style="--d:220ms">une idée devient</span>
+            <span class="about__line" data-reveal style="--d:290ms">un projet. Et</span>
+            <span class="about__line" data-reveal style="--d:430ms">quand il réunit</span>
+
+            <span class="about__row">
+              <span class="about__word about__word--1" data-reveal style="--d:500ms">toute</span>
+              <span class="about__inline frame" data-wipe style="--wipe:var(--ink);--d:500ms">
+                <Media bare file="caps/caps-cover.webp" alt="L'équipe CAPS en régie pendant un direct" label="Photo" />
+              </span>
+              <span class="about__word about__word--2" data-reveal style="--d:570ms">une</span>
+              <span class="about__word about__word--3" data-reveal style="--d:640ms">équipe</span>
+            </span>
+
+            <span class="about__line" data-reveal style="--d:710ms">jusqu’au jour J,</span>
+            <span class="about__line" data-reveal style="--d:780ms">et même après</span>
+            <span class="about__line" data-reveal style="--d:850ms">le dernier</span>
+            <span class="about__line" data-reveal style="--d:920ms">direct. »</span>
+          </blockquote>
+        </div>
+
+        <div class="leaf about__right">
+          <span class="folio">Konstance Kruger — Portfolio 2026</span>
+
+          <figure class="about__portrait">
+            <div class="frame" data-wipe style="--wipe:var(--lime);--d:300ms">
+              <Media bare file="portrait/konstance.webp" alt="Portrait de Konstance Kruger" label="Portrait" />
+            </div>
+          </figure>
+
+          <div class="about__text" data-reveal style="--d:1000ms">
+            <p>
+              Étudiante en deuxième année de BUT Métiers du Multimédia et de l’Internet,
+              j’aime les projets qui demandent à la fois de l’organisation, de la création
+              et de la polyvalence.
+            </p>
+            <p>
+              Travailler en équipe et mener un projet jusqu’à sa réalisation, c’est ce qui me
+              motive. Je souhaite évoluer vers la chefferie de projet et la production créative.
+            </p>
+          </div>
+        </div>
+      </article>
+
+      <!-- 14 / CONTACT ET SOMMAIRE — Contact à gauche (avec traînée d'images au survol),
+           sommaire rose poudré à droite. -->
+      <article id="contact" class="spread contact" data-scene style={place(iContact)} aria-label={`${two(iContact + 1)} — Contact et sommaire`}>
+        <div class="leaf contact__left">
+          <!-- TRAÎNÉE — De petites photos apparaissent sous la souris (décoratif). -->
+          <div class="trail" data-trail data-images={JSON.stringify(trailImages)} aria-hidden="true"></div>
+
+          <span class="folio">{chapMeet} — Me rencontrer / Contact</span>
+
+          <h2 class="contact__title" data-rise style="--d:150ms">Contact.</h2>
+
+          <p class="contact__copy" data-reveal style="--d:700ms">
+            Un événement, un tournage, un projet créatif&nbsp;?
+            Écrivez-moi, je serai ravie d’en parler.
+          </p>
+
+          <div class="contact__links" data-reveal style="--d:850ms">
+            {profile.email ? (
+              <a class="contact__email" href={`mailto:${profile.email}`}>{profile.email}</a>
+            ) : (
+              <span class="contact__todo">E-mail à renseigner dans src/data/profile.js</span>
+            )}
+
+            <div class="contact__socials">
+              {profile.linkedin && <a href={profile.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>}
+              {profile.instagram && <a href={profile.instagram} target="_blank" rel="noopener noreferrer">Instagram ↗</a>}
+            </div>
+          </div>
+        </div>
+
+        <div class="leaf contact__right">
+          <span class="folio">Sommaire</span>
+
+          <!-- SOMMAIRE — data-jump = numéro de la double page visée (0 = couverture). -->
+          <nav class="contact__index" aria-label="Sommaire des chapitres">
+            <a href="#couverture" data-jump="0" data-reveal style="--d:300ms"><span>01</span> Ouverture <span class="arrow" aria-hidden="true">↗</span></a>
+            <a href="#caps" data-jump="1" data-reveal style="--d:380ms"><span>02</span> Produire <span class="arrow" aria-hidden="true">↗</span></a>
+            <a href="#campus" data-jump="5" data-reveal style="--d:460ms"><span>03</span> Rassembler <span class="arrow" aria-hidden="true">↗</span></a>
+            {showCreer && (
+              <a href="#affiches" data-jump={iAffiches} data-reveal style="--d:540ms"><span>04</span> Créer <span class="arrow" aria-hidden="true">↗</span></a>
+            )}
+            <a href="#apropos" data-jump={iAbout} data-reveal style="--d:620ms"><span>{chapMeet}</span> Me rencontrer <span class="arrow" aria-hidden="true">↗</span></a>
+          </nav>
+
+          <!-- MENTIONS LÉGALES — Toujours accessibles depuis le magazine (obligation légale). -->
+          <a class="contact__legal" href="/mentions-legales/">Mentions légales</a>
+
+          <span class="edition">Konstance Kruger / 2026</span>
+        </div>
+      </article>
+
+    </div>
+  </div>
+
+  <!-- COMMANDES — Précédent / compteur / progression / suivant. -->
+  <nav class="mag__controls" aria-label="Navigation entre les doubles pages">
+    <button type="button" data-prev aria-label="Double page précédente">←</button>
+    <span data-count>01 / {two(total)}</span>
+    <span class="mag__progress" aria-hidden="true"><span data-progress></span></span>
+    <button type="button" data-next aria-label="Double page suivante">→</button>
+  </nav>
+
+  <!-- Annonce la double page courante aux lecteurs d'écran. -->
+  <span class="sr-only" data-live aria-live="polite"></span>
+</section>
