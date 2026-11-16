@@ -1,0 +1,2 @@
+# Fichier inutilisé : le site est hébergé sur Netlify, qui ne lit pas les .htaccess.
+# Le passage en HTTPS et les redirections sont gérés par Netlify (voir _redirects).

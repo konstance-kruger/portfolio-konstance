@@ -31,10 +31,12 @@ Tailwind et DaisyUI ont été retirés le 16 novembre 2026 : le magazine ne les 
 - `public/assets/images/` et `public/assets/videos/` : médias.
 - `IA.md`, `JOURNAL.md`, `QUALITE.md` : livrables demandés par la consigne.
 
-## Publier sur Infomaniak
+## Publier sur Netlify
 
-```sh
-npm run build
-```
+Le VPS de l’école étant bloqué, le site est hébergé sur Netlify. Le nom de domaine `kkruger.fr` reste chez Infomaniak : un enregistrement DNS **CNAME** `portfolio` pointe vers l’adresse `….netlify.app` du site.
 
-Envoyer le **contenu** du dossier `dist/` dans le dossier web du domaine (FTP ou gestionnaire de fichiers Infomaniak). Ne pas envoyer `node_modules` ni les sources. Une fois le domaine connu, le renseigner dans `astro.config.mjs` (`site`) et dans `public/robots.txt`.
+- `netlify.toml` : Netlify lance `npm run build` et publie `dist/` (Node 22).
+- `public/_redirects` : redirections des anciennes adresses.
+- Le HTTPS (certificat Let’s Encrypt) est fourni et renouvelé automatiquement par Netlify.
+
+Avec le dépôt GitHub relié à Netlify, chaque `git push` met le site à jour.

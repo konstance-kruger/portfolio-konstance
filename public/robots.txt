@@ -2,5 +2,4 @@
 User-agent: *
 Allow: /
 
-# Ajouter ici, une fois le nom de domaine connu :
-# Sitemap: https://VOTRE-DOMAINE/sitemap.xml
+Sitemap: https://portfolio.kkruger.fr/sitemap.xml

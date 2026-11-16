@@ -32,19 +32,19 @@ Grille construite pour ce site : un magazine d’une seule page, très visuel (p
 | --- | --- | --- |
 | Titre et description | Code de `BaseLayout.astro` | Description rendue précise (16/11) |
 | Structure des titres | Un seul `h1` (mon nom), `h2` par double page | Conforme |
-| Anciennes pages en double | Liste des pages générées | `/caps/`, `/spac/`, `/a-propos/`, `/contact/`, `/creations/` redirigent vers le magazine, avec `noindex` (16/11) |
-| robots.txt, favicon, partage | Fichiers et balises | Ajoutés (16/11) ; adresse canonique et plan du site à activer avec le nom de domaine |
+| Anciennes pages en double | Liste des pages générées | `/caps/`, `/spac/`, `/a-propos/`, `/contact/`, `/creations/` redirigent vers le magazine : redirection 301 Netlify (`_redirects`) et page de secours Astro (16/11) |
+| robots.txt, plan du site, favicon, partage, adresse canonique | Fichiers et balises, `https://portfolio.kkruger.fr` | Ajoutés (16/11) |
 
 ## Conformité juridique
 
 | Critère | Vérification | Résultat / correction |
 | --- | --- | --- |
 | Mentions légales accessibles | Depuis l’accueil | Lien ajouté dans le sommaire (16/11) |
-| Éditrice et hébergeur | Contenu de la page | Infomaniak Network SA, coordonnées vérifiées sur ses documents ; mon e-mail : à renseigner |
+| Éditrice et hébergeur | Contenu de la page | Hébergeur Netlify, Inc. (adresse de ses conditions contractuelles) ; domaine chez Infomaniak ; mon e-mail : à renseigner |
 | Crédits photo | Relecture des photos | « © Ethan HDM » pour la Nuit du volley ; auteur de la mascotte SPAC : à préciser |
 | Droit à l’image | Personnes identifiables sur les photos | Procédure de retrait indiquée ; accords des personnes : à obtenir |
 | Polices | Licence | ITF Free Font License (Fontshare), mentionnée |
-| Données personnelles | Cookies, formulaires, statistiques | Aucun ; transmission d’IP à Fontshare signalée |
+| Données personnelles | Cookies, formulaires, statistiques | Aucun ; transmission technique de l’IP à Netlify (États-Unis) et Fontshare signalée |
 
 ## Tests d’affichage réalisés
 

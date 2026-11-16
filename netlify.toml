@@ -1,0 +1,9 @@
+# NETLIFY — Comment construire et publier le site.
+# Netlify lance « npm run build » puis met en ligne le dossier dist/.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  # Astro demande Node 22 ou plus récent.
+  NODE_VERSION = "22"
