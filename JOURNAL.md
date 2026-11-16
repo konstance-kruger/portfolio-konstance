@@ -37,3 +37,5 @@ Recomposition du Hero depuis la maquette : prénom fin, nom gras incliné, ovale
 - Décision : le chapitre « Créer » s’affiche seulement quand mes créations sont déposées, pour ne pas publier de pages vides.
 - Constat : le projet n’était pas suivi par Git. Dépôt à créer maintenant ; je ne reconstitue pas d’historique fictif.
 - Mise en ligne : nom de domaine kkruger.fr (Infomaniak), sous-domaine portfolio.kkruger.fr. Le VPS de l’école prévu en cours étant bloqué, décision d’héberger le site sur Netlify (HTTPS automatique) ; le DNS du sous-domaine pointe vers Netlify.
+- Dépôt GitHub créé et rendu public : https://github.com/konstance-kruger/portfolio-konstance. Netlify est relié au dépôt : chaque envoi (Sync Changes) republie le site.
+- HTTPS : premier échec du certificat Let’s Encrypt (« We could not provision a certificate ») car le domaine n’était pas encore ajouté dans Netlify. Après ajout de portfolio.kkruger.fr dans Domain management et vérification du DNS (CNAME seul, aucun enregistrement CAA bloquant), certificat obtenu. Site en ligne sur https://portfolio.kkruger.fr, domaine principal du projet Netlify.

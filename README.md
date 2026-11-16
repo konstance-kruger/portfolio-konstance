@@ -2,6 +2,9 @@
 
 Magazine numérique en doubles pages : la page d’accueil contient tout le portfolio.
 
+- Site en ligne : https://portfolio.kkruger.fr
+- Dépôt GitHub : https://github.com/konstance-kruger/portfolio-konstance
+
 ## Démarrer dans VS Code
 
 Ouvrir ce dossier, puis dans le terminal intégré :
@@ -33,7 +36,7 @@ Tailwind et DaisyUI ont été retirés le 16 novembre 2026 : le magazine ne les 
 
 ## Publier sur Netlify
 
-Le VPS de l’école étant bloqué, le site est hébergé sur Netlify. Le nom de domaine `kkruger.fr` reste chez Infomaniak : un enregistrement DNS **CNAME** `portfolio` pointe vers l’adresse `….netlify.app` du site.
+Le VPS de l’école étant bloqué, le site est hébergé sur Netlify. Le nom de domaine `kkruger.fr` reste chez Infomaniak : un enregistrement DNS **CNAME** `portfolio` pointe vers `portfolio-kkruger.netlify.app`.
 
 - `netlify.toml` : Netlify lance `npm run build` et publie `dist/` (Node 22).
 - `public/_redirects` : redirections des anciennes adresses.

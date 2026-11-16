@@ -40,7 +40,7 @@ Grille construite pour ce site : un magazine d’une seule page, très visuel (p
 | Critère | Vérification | Résultat / correction |
 | --- | --- | --- |
 | Mentions légales accessibles | Depuis l’accueil | Lien ajouté dans le sommaire (16/11) |
-| Éditrice et hébergeur | Contenu de la page | Hébergeur Netlify, Inc. (adresse de ses conditions contractuelles) ; domaine chez Infomaniak ; mon e-mail : à renseigner |
+| Éditrice et hébergeur | Contenu de la page | Hébergeur Netlify, Inc. (adresse de ses conditions contractuelles) ; domaine chez Infomaniak ; mon e-mail affiché (16/11) |
 | Crédits photo | Relecture des photos | « © Ethan HDM » pour la Nuit du volley ; auteur de la mascotte SPAC : à préciser |
 | Droit à l’image | Personnes identifiables sur les photos | Procédure de retrait indiquée ; accords des personnes : à obtenir |
 | Polices | Licence | ITF Free Font License (Fontshare), mentionnée |
