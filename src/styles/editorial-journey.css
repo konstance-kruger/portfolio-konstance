@@ -47,15 +47,6 @@
    2. STRUCTURE DU MAGAZINE
    ------------------------------------------------------------------ */
 
-/* Sur ordinateur, la page ne défile pas : c'est la « caméra » qui se déplace. */
-@media (min-width: 761px) {
-  html:has(.mag),
-  body:has(.mag) {
-    overflow: hidden;
-    height: 100%;
-  }
-}
-
 /* L'en-tête et le pied de page communs sont masqués sur le magazine. */
 body:has(.mag) .site-header,
 body:has(.mag) .site-footer,
@@ -76,14 +67,14 @@ body:has(.mag) main {
   box-sizing: border-box;
 }
 
+/* Défilement continu (one scroll) : les doubles pages se suivent dans la page
+   et s'empilent en défilant ; c'est la barre de défilement du navigateur qui
+   fait tout, le JS ne fait qu'ajouter l'effet de recul (--cover). */
 .mag {
   position: relative;
   width: 100%;
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
   color: var(--ink);
-  background: var(--light);   /* visible autour des pages pendant le recul de la caméra */
+  background: var(--ink);     /* visible derrière une page qui recule */
   font-family: var(--sans);
   font-size: var(--text);
   line-height: 1.5;
@@ -114,38 +105,37 @@ body:has(.mag) main {
   text-decoration: none;
 }
 
-.mag__viewport {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  transform-origin: 50% 50%;
-  will-change: transform;
-}
-
-/* Le « monde » contient toutes les doubles pages ; c'est lui que le JS déplace. */
+.mag__viewport,
 .mag__world {
-  position: absolute;
-  top: 0;
-  left: 0;
-  will-change: transform;
+  position: relative;
 }
 
-/* DOUBLE PAGE — Placée à (colonne × largeur d'écran, ligne × hauteur d'écran). */
+/* Pause de lecture après chaque double page (hauteur réglée en JS). */
+.mag__dwell {
+  pointer-events: none;
+}
+
+/* DOUBLE PAGE — Collée en haut de l'écran (sticky) : la suivante monte par-dessus
+   comme une feuille posée sur une pile. Celle du dessous recule légèrement et
+   s'assombrit selon --cover (0 = visible, 1 = entièrement recouverte, réglé en JS). */
 .mag .spread {
-  position: absolute;
-  top: calc(var(--y) * 100vh);
-  left: calc(var(--x) * 100vw);
+  position: sticky;
+  top: 0;
   width: 100vw;
   height: 100vh;
   display: grid;
   grid-template-columns: 1fr 1fr;
   overflow: hidden;
   background: var(--white);
+  transform: scale(calc(1 - var(--cover, 0) * 0.06));
+  transform-origin: 50% 100%;
+  filter: brightness(calc(1 - var(--cover, 0) * 0.45));
+  box-shadow: 0 -1.5vh 5vh rgb(0 0 0 / 0.28);   /* ombre de la feuille qui arrive */
+  will-change: transform, filter;
 }
 
 @supports (height: 100dvh) {
   .mag .spread {
-    top: calc(var(--y) * 100dvh);
     height: 100dvh;
   }
 }
@@ -528,6 +518,7 @@ body:has(.mag) main {
 
 .mag .caps-video__text strong {
   font-weight: 700;
+  color: var(--lime);             /* touche lime : mots clés sur fond sombre */
 }
 
 /* 03 — CAPS, NUITS DU SPORT (maquette « MacBook Air 10 ») ----------- */
@@ -566,12 +557,13 @@ body:has(.mag) main {
   text-transform: uppercase;
 }
 
+/* Photo agrandie vers le bas (le texte du bas a été raccourci). */
 .mag .caps__photo {
   position: absolute;
   top: 30.8%;
   left: 10%;
   width: 81.1%;
-  height: 38.8%;
+  height: 50%;
 }
 
 .mag .caps__photo .frame {
@@ -599,12 +591,13 @@ body:has(.mag) main {
 
 .mag .caps__bottom {
   position: absolute;
-  top: 74.3%;
+  top: 85.4%;
   left: 10%;
   right: 9.7%;
-  display: grid;
-  grid-template-columns: 31.4fr 33.1fr;
-  column-gap: 15%;
+  font-size: min(1.25vw, 2vh);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
 }
 
 /* PAGE DROITE — Photo de volley encadrée sur fond blanc
@@ -791,7 +784,7 @@ body:has(.mag) main {
 .mag .esport__title {
   position: absolute;
   z-index: 3;
-  top: 7.1%;
+  top: 9%;
   left: 0;
   color: var(--ink);
 }
@@ -799,7 +792,7 @@ body:has(.mag) main {
 .mag .esport__band {
   display: block;
   width: max-content;
-  padding: 0.1em 0.12em 0.04em 6.4vw;
+  padding: 0.18em 0.28em 0.12em 6.4vw;   /* bande rose plus large autour du titre */
   background: var(--powder);
 }
 
@@ -864,6 +857,29 @@ body:has(.mag) main {
 .mag .esport__frame--1 { top: 10.2%; bottom: 52.3%; }
 .mag .esport__frame--2 { top: 52.4%; bottom: 10.1%; }
 
+/* Légende du tournoi, en bas à gauche de chaque photo. */
+.mag .esport__tag {
+  left: 4%;
+  bottom: 7%;
+  margin: 0;
+}
+
+/* Légendes plus discrètes que le titre de la page, soulignées d'un trait lime. */
+.mag .esport__tag .photo-tag__title {
+  padding-bottom: 0.12em;
+  border-bottom: 0.12em solid var(--lime);
+  font-size: min(2vw, 3.2vh);
+}
+
+/* Surlignage lime réutilisable (comme au marqueur). */
+.mag .lime-mark {
+  padding: 0 0.12em;
+  background: var(--lime);
+  color: inherit;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
 /* 06 — VIE AU CAMPUS (maquette « MacBook Air 18 ») --------------- */
 /* Positions relevées sur la maquette (1280 × 832), en % de la double page. */
 .mag .campus {
@@ -912,6 +928,7 @@ body:has(.mag) main {
 
 .mag .campus__text strong {
   font-weight: 700;
+  color: var(--lime);             /* touche lime : mots clés sur fond sombre */
 }
 
 /* 07 — SPAC (maquette « MacBook Air 19 ») ----------------------- */
@@ -969,21 +986,43 @@ body:has(.mag) main {
   text-transform: uppercase;
 }
 
+/* Le bloc de texte part du bord gauche de la mascotte (57,4 %) jusqu'à 96,7 %
+   et descend jusqu'en bas ; une forme invisible (.spac__wrap) réserve la
+   colonne de gauche puis suit le contour de la mascotte : le texte commence
+   à 75,6 % et contourne la mascotte quand il arrive à sa hauteur. */
 .mag .spac__text {
   position: absolute;
   z-index: 2;
-  left: 75.6%;
+  left: 57.4%;
   top: 36.4%;
-  width: 21.1%;
+  bottom: 0;
+  width: 39.3%;
   font-size: min(1.1vw, 1.7vh);
   font-weight: 500;
   line-height: 1.43;
   text-align: justify;
   text-transform: uppercase;
+  hyphens: auto;          /* coupe seulement les mots longs, pour éviter les grands blancs */
+  -webkit-hyphens: auto;
+  hyphenate-limit-chars: 10 4 4;
 }
 
+/* Touche lime sur fond clair : mots clés surlignés comme au marqueur. */
 .mag .spac__text strong {
   font-weight: 700;
+  padding: 0 0.15em;
+  background: var(--lime);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/* Contour de la mascotte (largeur 31,9vw, hauteur 29,24vw, descendue de 4vh),
+   relevé ligne par ligne sur son PNG transparent, lissé, avec 1,8vw de marge. */
+.mag .spac__wrap {
+  float: left;
+  width: 39.3vw;
+  height: 100%;
+  shape-outside: polygon(0 0, 18.2vw 0, 18.2vw calc(100% + 4vh - 30.69vw), 20.41vw calc(100% + 4vh - 28.89vw), 23.49vw calc(100% + 4vh - 28.47vw), 24.05vw calc(100% + 4vh - 28.05vw), 24.33vw calc(100% + 4vh - 27.63vw), 24.47vw calc(100% + 4vh - 27.21vw), 24.75vw calc(100% + 4vh - 26.79vw), 25.17vw calc(100% + 4vh - 26.37vw), 26.7vw calc(100% + 4vh - 25.95vw), 27.26vw calc(100% + 4vh - 25.53vw), 27.47vw calc(100% + 4vh - 25.11vw), 27.54vw calc(100% + 4vh - 24.69vw), 27.54vw calc(100% + 4vh - 24.27vw), 27.54vw calc(100% + 4vh - 23.85vw), 27.54vw calc(100% + 4vh - 23.43vw), 27.54vw calc(100% + 4vh - 23.01vw), 27.75vw calc(100% + 4vh - 22.59vw), 28.24vw calc(100% + 4vh - 22.17vw), 28.73vw calc(100% + 4vh - 21.76vw), 29.08vw calc(100% + 4vh - 21.34vw), 29.29vw calc(100% + 4vh - 20.92vw), 29.29vw calc(100% + 4vh - 20.5vw), 29.29vw calc(100% + 4vh - 20.08vw), 29.29vw calc(100% + 4vh - 19.66vw), 29.29vw calc(100% + 4vh - 19.24vw), 29.15vw calc(100% + 4vh - 18.82vw), 28.94vw calc(100% + 4vh - 18.4vw), 29.22vw calc(100% + 4vh - 17.98vw), 29.85vw calc(100% + 4vh - 17.56vw), 30.34vw calc(100% + 4vh - 17.14vw), 30.76vw calc(100% + 4vh - 16.72vw), 30.97vw calc(100% + 4vh - 16.3vw), 31.18vw calc(100% + 4vh - 15.88vw), 31.18vw calc(100% + 4vh - 15.46vw), 31.18vw calc(100% + 4vh - 15.04vw), 31.18vw calc(100% + 4vh - 14.62vw), 31.18vw calc(100% + 4vh - 14.2vw), 31.11vw calc(100% + 4vh - 13.78vw), 30.97vw calc(100% + 4vh - 13.36vw), 30.76vw calc(100% + 4vh - 12.94vw), 30.48vw calc(100% + 4vh - 12.52vw), 30.06vw calc(100% + 4vh - 12.1vw), 29.64vw calc(100% + 4vh - 11.68vw), 29.64vw calc(100% + 4vh - 11.26vw), 29.43vw calc(100% + 4vh - 10.84vw), 29.08vw calc(100% + 4vh - 10.42vw), 29.01vw calc(100% + 4vh - 10.0vw), 28.8vw calc(100% + 4vh - 9.58vw), 28.45vw calc(100% + 4vh - 9.16vw), 28.38vw calc(100% + 4vh - 8.74vw), 28.17vw calc(100% + 4vh - 8.32vw), 27.12vw calc(100% + 4vh - 7.9vw), 22.23vw calc(100% + 4vh - 7.48vw), 22.3vw calc(100% + 4vh - 7.07vw), 22.37vw calc(100% + 4vh - 6.65vw), 22.37vw calc(100% + 4vh - 6.23vw), 22.37vw calc(100% + 4vh - 5.81vw), 22.37vw calc(100% + 4vh - 5.39vw), 22.86vw calc(100% + 4vh - 4.97vw), 23.28vw calc(100% + 4vh - 4.55vw), 23.63vw calc(100% + 4vh - 4.13vw), 24.05vw calc(100% + 4vh - 3.71vw), 24.61vw calc(100% + 4vh - 3.29vw), 25.31vw calc(100% + 4vh - 2.87vw), 25.86vw calc(100% + 4vh - 2.45vw), 26.21vw calc(100% + 4vh - 2.03vw), 26.35vw calc(100% + 4vh - 1.61vw), 26.35vw calc(100% + 4vh - 1.19vw), 26.35vw calc(100% + 4vh - 0.77vw), 26.35vw calc(100% + 4vh - 0.35vw), 26.28vw 100%, 0 100%);
 }
 
 /* Mascotte : de 57,4 % à 89,3 % de la largeur, coupée par le bas de la page. */
@@ -991,7 +1030,7 @@ body:has(.mag) main {
   position: absolute;
   z-index: 1;
   left: 57.4%;
-  bottom: 0;
+  bottom: -4vh;          /* légèrement coupée par le bas : sa main ne touche plus le sous-titre */
   width: 31.9%;
   height: auto;
   max-width: none;
@@ -1019,14 +1058,16 @@ body:has(.mag) main {
 
 .mag .photo-tag__date {
   padding-bottom: 0.15em;
+  color: var(--lime);             /* touche lime : dates sur les photos */
   font-size: min(1.1vw, 1.75vh);
   font-weight: 600;
   white-space: nowrap;
 }
 
 /* FONDU NOIR — Sur les photos qui portent un texte en bas (conférence Inouï,
-   Radio Campus, journée portes ouvertes) : noir au bord inférieur, qui se
-   dégrade vers le haut pour que le texte blanc reste lisible. */
+   Radio Campus, journée portes ouvertes, tournois e-sport) : noir au bord
+   inférieur, qui se dégrade vers le haut pour que le texte blanc reste lisible. */
+.mag .esport__frame::before,
 .mag .inoui__photo .frame::before,
 .mag .inoui__radio .frame::before,
 .mag .jpo__photo .frame::before {
@@ -1102,6 +1143,7 @@ body:has(.mag) main {
 
 .mag .inoui__text strong {
   font-weight: 700;
+  color: var(--lime);             /* touche lime : mots clés sur fond sombre */
 }
 
 .mag .inoui__right {
@@ -1155,13 +1197,30 @@ body:has(.mag) main {
 /* 09 — WEBTV, JOURNÉE PORTES OUVERTES (maquette « MacBook Air 11 ») - */
 .mag .jpo__left {
   display: grid;
-  grid-template-rows: 1fr 1fr;
-  row-gap: 4vh;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 1fr;
   padding: 11vh 8.5% 9vh 8.3%;
   background: var(--powder);
 }
 
+/* Grand guillemet lime en haut de la page, comme une citation de magazine. */
+.mag .jpo__left::before {
+  content: '“';
+  position: absolute;
+  top: 6vh;
+  left: 6%;
+  color: var(--lime);
+  font-family: var(--serif);
+  font-size: min(26vw, 42vh);
+  line-height: 1;
+  pointer-events: none;
+}
+
 .mag .jpo__half {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;   /* citation posée en bas de la page */
+  min-width: 0;   /* la colonne garde la largeur de la page, même avec des lignes sans retour */
   min-height: 0;
 }
 
@@ -1171,8 +1230,20 @@ body:has(.mag) main {
   line-height: 0.93;
 }
 
-.mag .jpo__line--1 { width: 83%; }
-.mag .jpo__line--2 { width: 67%; }
+/* Alignement magazine : lignes calées à gauche (pas d'espaces étirés),
+   guillemet ouvrant suspendu dans la marge pour que les lettres s'alignent. */
+.mag .jpo__quote .about__line {
+  position: relative;
+  text-align: left;
+  text-align-last: auto;
+  white-space: nowrap;
+}
+
+.mag .jpo__open {
+  position: absolute;
+  right: 100%;
+  padding-right: 0.06em;
+}
 
 .mag .jpo__right {
   padding: 0;
@@ -1266,10 +1337,51 @@ body:has(.mag) main {
   justify-self: end;
 }
 
-/* 13 — À PROPOS (référence lime) --------------------------------- */
+/* 13 — À PROPOS ---------------------------------------------------- */
+/* Page gauche : photo plein cadre, fondu noir en bas, phrase en Melodrama. */
 .mag .about__left {
-  padding-top: calc(var(--pad-y) + 1vh);
-  background: var(--lime);
+  padding: 0;
+  background: var(--ink);
+}
+
+.mag .about__photo {
+  position: absolute;
+  inset: 0;
+}
+
+.mag .about__photo::before {
+  content: '';
+  position: absolute;
+  inset: 45% 0 0;
+  z-index: 2;
+  background: linear-gradient(to top,
+    rgb(0 0 0 / 0.85) 0%,
+    rgb(0 0 0 / 0.5) 40%,
+    rgb(0 0 0 / 0) 100%);
+  pointer-events: none;
+}
+
+.mag .about__folio {
+  z-index: 3;
+  color: var(--white);
+}
+
+.mag .about__punch {
+  position: absolute;
+  z-index: 3;
+  left: 10%;
+  right: 10%;
+  bottom: 9vh;
+  margin: 0;
+  color: var(--white);
+  font-family: var(--serif);
+  font-size: min(4.4vw, 7.2vh);
+  line-height: 0.98;
+  text-transform: uppercase;
+}
+
+.mag .about__mark {
+  color: var(--lime);
 }
 
 /* Citation : capitales Melodrama, chaque ligne justifiée sur toute la largeur.
@@ -1322,35 +1434,107 @@ body:has(.mag) main {
   margin-top: 0.08em;
 }
 
+/* Page droite : titre, une ligne, grandes étiquettes, bandeau logiciels. */
 .mag .about__right {
+  display: flex;
+  flex-direction: column;
+  gap: 4.6vh;
+  padding: 11vh 4.6vw 9vh;
   background: var(--white);
 }
 
-/* Portrait encadré sur la page blanche, avec le texte en légende dessous. */
-.mag .about__portrait {
-  position: absolute;
-  top: var(--pad-y);
-  left: 12%;
-  right: 12%;
-  bottom: 30%;
+.mag .about__title {
+  font-size: min(6.4vw, 11vh);
+  font-weight: 700;
+  line-height: 0.82;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
 }
 
-.mag .about__portrait .frame {
-  position: absolute;
-  inset: 0;
+.mag .about__bio {
+  font-size: min(1.5vw, 2.4vh);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
 }
 
-.mag .about__text {
-  position: absolute;
-  left: 12%;
-  right: 12%;
-  bottom: 6vh;
+.mag .about__bio sup {
+  font-size: 0.6em;
+}
+
+/* Compétences : grandes étiquettes arrondies, en contour ou pleines en lime. */
+.mag .about__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.4vh 0.8vw;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mag .about__tags li {
+  padding: 0.32em 0.7em 0.26em;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  font-size: min(2.1vw, 3.4vh);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+
+.mag .about__tags li.is-lime {
+  border-color: var(--lime);
+  background: var(--lime);
+}
+
+/* Logiciels : bandeau gris foncé, noms en Melodrama, barres obliques lime. */
+.mag .about__tools {
+  margin-top: auto;
+  padding: 2.2vh 1.6vw 2.4vh;
+  background: var(--ink);
+  color: var(--white);
+}
+
+.mag .about__tools-label {
+  display: block;
+  margin-bottom: 1vh;
+  color: var(--lime);
+  font-size: min(0.75vw, 1.2vh);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Logos des applications, alignés sur une ligne, en tuiles de même taille. */
+.mag .about__logos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.4vw;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mag .about__logos li {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2vw;
-  font-size: calc(var(--text) * 0.92);
-  text-align: justify;
-  hyphens: auto;
+  place-items: center;
+  height: min(4.4vw, 7vh);
+  min-width: min(4.4vw, 7vh);
+}
+
+.mag .about__logos img {
+  width: auto;
+  height: 100%;
+  object-fit: contain;
+}
+
+.mag .about__tool {
+  white-space: nowrap;
+  font-family: var(--serif);
+  font-size: min(2vw, 3.2vh);
 }
 
 /* 14 — CONTACT ET SOMMAIRE ---------------------------------------- */
@@ -1498,7 +1682,7 @@ body:has(.mag) main {
    5. COMMANDES DE NAVIGATION
    ------------------------------------------------------------------ */
 .mag__controls {
-  position: absolute;
+  position: fixed;
   right: 1.2rem;
   bottom: 1.2rem;
   z-index: 10;
@@ -1604,17 +1788,42 @@ body:has(.mag) main {
     transform: none;
   }
 
-  /* C. Blocs qui glissent vers le haut en apparaissant (data-reveal). */
+  /* C. Textes qui glissent vers le haut en apparaissant (data-reveal).
+        Ils arrivent un par un AU RYTHME DU DÉFILEMENT : le JS leur ajoute
+        .is-in pendant la pause de lecture de la double page. */
   .js-anim .mag [data-reveal] {
     opacity: 0;
     transform: translateY(26px);
-    transition: opacity 0.9s ease, transform 1s var(--ease);
-    transition-delay: var(--d, 450ms);
+    transition: opacity 0.7s ease, transform 0.8s var(--ease);
   }
 
-  .js-anim .mag .is-shown [data-reveal] {
+  .js-anim .mag [data-reveal].is-in {
     opacity: 1;
     transform: none;
+  }
+
+  /* C bis. Textes « écrits » : le bloc est là, ses lettres apparaissent une à une,
+     de gauche à droite, au rythme du défilement (classe .on posée par le JS).
+     Sur téléphone, tout le texte s'affiche à l'arrivée (.is-in sur le bloc). */
+  .js-anim .mag [data-reveal].is-typed {
+    opacity: 1;
+    transform: none;
+  }
+
+  .js-anim .mag .is-typed .ch {
+    opacity: 0;
+    transition: opacity 0.18s linear;
+  }
+
+  .js-anim .mag .is-typed .ch.on,
+  .js-anim .mag .is-typed.is-in .ch {
+    opacity: 1;
+  }
+
+  /* Le surlignage lime n'apparaît qu'une fois ses mots écrits. */
+  .js-anim .mag .is-typed:not(.is-in) strong:has(.ch:not(.on)),
+  .js-anim .mag .is-typed:not(.is-in) mark:has(.ch:not(.on)) {
+    background: transparent;
   }
 
   /* D. Aplat de couleur qui se retire et dévoile la photo (data-wipe),
@@ -1699,6 +1908,248 @@ body:has(.mag) main {
   }
 }
 
+/* ÉTUDES DE CAS -------------------------------------------------------
+   Même langage que les autres doubles pages : grand titre bâton ajusté à la
+   largeur, sous-titre en gras, texte en capitales justifiées, chiffres en
+   Melodrama. Gauche rose = le projet ; droite blanche = photo (si elle existe)
+   puis les étapes. */
+.mag .case__left,
+.mag .case__right {
+  display: flex;
+  flex-direction: column;
+  padding: 9.6vh 4.6vw 9vh;
+}
+
+.mag .case__left {
+  gap: 4.4vh;
+  background: var(--powder);
+}
+
+.mag .case__right {
+  gap: 4vh;
+  background: var(--white);
+}
+
+.mag .case__rubric {
+  align-self: flex-start;
+  margin: 0;
+  padding: 0.35em 0.6em 0.3em;
+  background: var(--lime);        /* touche lime : étiquette de rubrique */
+  font-size: min(0.8vw, 1.25vh);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Titre : une ligne par élément, toutes à la même taille (JS data-fit). */
+.mag .case__title {
+  display: flex;
+  flex-direction: column;
+  color: var(--ink);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.mag .case__title > span {
+  font-size: min(6vw, 13vh);   /* secours ; le JS ajuste à 40 % de la largeur */
+  line-height: 0.82;
+  letter-spacing: -0.05em;
+  white-space: nowrap;
+}
+
+/* Sous-titre et texte côte à côte (proportions de la page SPAC). */
+.mag .case__body {
+  max-width: 88%;
+}
+
+.mag .case__subtitle {
+  font-size: min(2.2vw, 3.5vh);
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+
+.mag .case__text {
+  font-size: min(1vw, 1.6vh);
+  font-weight: 500;
+  line-height: 1.43;
+  text-align: justify;
+  text-transform: uppercase;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphenate-limit-chars: 10 4 4;
+}
+
+/* Résultat en bas de la page rose. */
+.mag .case__result {
+  align-self: flex-start;
+  margin-top: auto;
+  padding: 2.4vh 1.8vw 2.6vh;
+  background: var(--lime);        /* touche lime : bloc du résultat */
+}
+
+.mag .case__stat {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.4vw;
+}
+
+.mag .case__stat strong {
+  font-family: var(--serif);
+  font-size: min(7.4vw, 12vh);
+  font-weight: 400;
+  line-height: 0.8;
+  white-space: nowrap;
+}
+
+.mag .case__stat span {
+  max-width: 22ch;
+  padding-bottom: 0.6vh;
+  font-size: min(1vw, 1.6vh);
+  font-weight: 700;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.mag .case__link {
+  font-size: min(2.2vw, 3.5vh);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
+}
+
+.mag .case__link:hover,
+.mag .case__link:focus-visible {
+  text-decoration: none;
+}
+
+/* Photo de la page droite (Nuits du sport) : fondu noir + légende blanche. */
+.mag .case__photo {
+  position: relative;
+  flex: 0 0 46%;
+  margin: -4.6vh -1.4vw 0;
+}
+
+.mag .case__photo .frame {
+  position: absolute;
+  inset: 0;
+}
+
+.mag .case__photo .frame::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 55%;
+  z-index: 2;
+  background: linear-gradient(to top,
+    rgb(0 0 0 / 0.85) 0%,
+    rgb(0 0 0 / 0.55) 30%,
+    rgb(0 0 0 / 0.2) 65%,
+    rgb(0 0 0 / 0) 100%);
+  pointer-events: none;
+}
+
+.mag .case__tag {
+  left: 3.2%;
+  bottom: 7%;
+  margin: 0;
+}
+
+/* Étapes : deux colonnes, numéro en Melodrama, titre en gras, texte justifié. */
+.mag .case__steps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3.4vh 2.6vw;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Touche gris foncé : un filet au-dessus de chaque étape. */
+.mag .case__steps li {
+  padding-top: 1.4vh;
+  border-top: 1.5px solid var(--ink);
+}
+
+/* Sans photo : page droite gris foncé, chiffres lime (contraste façon magazine). */
+.mag .case:not(.case--photo) .case__right {
+  background: var(--ink);
+  color: var(--white);
+}
+
+.mag .case:not(.case--photo) .case__num {
+  color: var(--lime);
+}
+
+.mag .case:not(.case--photo) .case__steps li {
+  border-top-color: rgb(255 255 255 / 0.35);
+}
+
+.mag .case:not(.case--photo) .case__meta {
+  background: var(--lime);
+  color: var(--ink);
+}
+
+/* Sans photo : une colonne, numéro à gauche, étapes réparties sur la page. */
+.mag .case:not(.case--photo) .case__steps {
+  grid-template-columns: 1fr;
+  flex: 1;
+  align-content: center;
+  row-gap: 6vh;
+}
+
+.mag .case:not(.case--photo) .case__steps li {
+  display: grid;
+  grid-template-columns: min(7vw, 11vh) 1fr;
+  grid-template-rows: auto 1fr;
+  column-gap: 1.6vw;
+}
+
+.mag .case:not(.case--photo) .case__steps .case__num {
+  grid-row: span 2;
+  margin: 0;
+}
+
+.mag .case__num {
+  display: block;
+  margin-bottom: 1vh;
+  font-family: var(--serif);
+  font-size: min(3.2vw, 5.2vh);
+  line-height: 0.8;
+}
+
+.mag .case:not(.case--photo) .case__num {
+  font-size: min(4.6vw, 7.4vh);
+}
+
+.mag .case__step-title {
+  margin-bottom: 0.6vh;
+  font-size: min(1.25vw, 2vh);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+.mag .case__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 2vw;
+  margin-top: auto;
+  padding: 1.4vh 1.2vw;
+  background: var(--ink);          /* touche gris foncé : fiche en bas de page */
+  color: var(--white);
+  font-size: min(0.8vw, 1.25vh);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 /* ------------------------------------------------------------------
    6. MOBILE (≤ 760 px) — Lecture verticale au doigt.
    Les doubles pages s'empilent ; chaque page devient pleine largeur.
@@ -1706,6 +2157,27 @@ body:has(.mag) main {
    pour qu'aucun bloc ne soit coupé ni invisible.
    ------------------------------------------------------------------ */
 @media (max-width: 760px) {
+
+  /* Études de cas : pages empilées, tailles en largeur d'écran. */
+  .mag .case__left,
+  .mag .case__right { padding: var(--pad-y) var(--pad-x); gap: 4vh; }
+  .mag .case__rubric { font-size: 2.6vw; }
+  .mag .case__title > span { font-size: 15vw; }
+  .mag .case__body { grid-template-columns: 1fr; row-gap: 2.4vh; }
+  .mag .case__subtitle { font-size: 6.4vw; }
+  .mag .case__text,
+  .mag .case__stat span { font-size: 3.4vw; }
+  .mag .case__stat strong { font-size: 18vw; }
+  .mag .case__link { font-size: 5.4vw; }
+  .mag .case__photo { flex: none; height: 75vw; margin: calc(-1 * var(--pad-y)) calc(-1 * var(--pad-x)) 0; }
+  .mag .case__tag { left: var(--pad-x); }
+  .mag .case__steps { grid-template-columns: 1fr; }
+  .mag .case__num,
+  .mag .case:not(.case--photo) .case__num { font-size: 10vw; }
+  .mag .case__step-title { font-size: 4.4vw; }
+  .mag .case__meta { flex-direction: column; font-size: 2.6vw; padding: 3vw; }
+  .mag .case__result { padding: 4vw; }
+
   .mag {
     --pad-x: 6vw;
     --pad-y: 3.5rem;
@@ -1722,6 +2194,9 @@ body:has(.mag) main {
 
   .mag .spread,
   .mag .spread[style] {
+    transform: none;
+    filter: none;
+    box-shadow: none;
     position: relative;
     top: auto;
     left: auto;
@@ -1798,11 +2273,12 @@ body:has(.mag) main {
     width: 100%;
   }
 
-  .mag .caps__top,
-  .mag .caps__bottom {
+  .mag .caps__top {
     grid-template-columns: 1fr;
     gap: 1.2rem;
   }
+
+  .mag .caps__bottom { font-size: 3.8vw; }
 
   .mag .caps__title { font-size: 7.5vw; }
   .mag .caps__text { font-size: 3.4vw; }
@@ -1859,6 +2335,7 @@ body:has(.mag) main {
 
   .mag .esport__subtitle { font-size: 7.5vw; }
   .mag .esport__text { font-size: 3.4vw; }
+  .mag .esport__tag .photo-tag__title { font-size: 5.4vw; }
 
   .mag .esport__right {
     display: grid;
@@ -1904,9 +2381,13 @@ body:has(.mag) main {
   .mag .spac__subtitle { margin-top: 1.5rem; font-size: 7.5vw; }
   .mag .spac__text { margin-top: 1.2rem; font-size: 3.4vw; }
 
+  .mag .spac__wrap { display: none; }
+  .mag .spac__text { bottom: auto; width: auto; }
+
   .mag .spac__mascot {
     position: relative;
     left: auto;
+    bottom: auto;
     width: 70%;
     margin: 2rem auto 0;
   }
@@ -1938,9 +2419,11 @@ body:has(.mag) main {
   .mag .photo-tag__date { font-size: 3vw; }
 
   /* Journée portes ouvertes */
-  .mag .jpo__left { display: block; padding: var(--pad-y) var(--pad-x); }
+  .mag .jpo__left { display: block; padding: 30vw var(--pad-x) var(--pad-y); }
+  .mag .jpo__left::before { top: 2vw; font-size: 40vw; }
   .mag .jpo__half + .jpo__half { margin-top: 2.5rem; }
-  .mag .jpo__quote { font-size: 7.4vw; }
+  .mag .jpo__quote { font-size: 6vw; }
+  .mag .jpo__quote .about__line { white-space: normal; }
   .mag .jpo__right { height: 135vw; }
 
   /* Affiches, recherches, photographies */
@@ -1962,18 +2445,19 @@ body:has(.mag) main {
 
   .mag .photos__frame { height: 110vw; }
 
-  /* À propos : citation en flux, portrait et texte empilés. */
-  .mag .about__left { gap: 2.5rem; }
-  .mag .about__quote { font-size: 8.4vw; }
-
-  .mag .about__portrait,
-  .mag .about__text {
-    position: relative;
-    inset: auto;
-  }
-
-  .mag .about__portrait { height: 110vw; margin-bottom: 1.5rem; }
-  .mag .about__text { grid-template-columns: 1fr; gap: 1.2rem; }
+  /* À propos : photo puis page de texte, empilées. */
+  .mag .about__left { height: 120vw; }
+  .mag .about__punch { left: var(--pad-x); right: var(--pad-x); bottom: 6vw; font-size: 9vw; }
+  .mag .about__right { padding: var(--pad-y) var(--pad-x); gap: 2rem; }
+  .mag .about__title { font-size: 15vw; }
+  .mag .about__bio { font-size: 4.6vw; }
+  .mag .about__tags { gap: 2vw; }
+  .mag .about__tags li { font-size: 5vw; }
+  .mag .about__tools { padding: 4vw; }
+  .mag .about__tools-label { font-size: 2.6vw; }
+  .mag .about__logos { gap: 4vw; }
+  .mag .about__logos li { height: 11vw; min-width: 11vw; }
+  .mag .about__tool { font-size: 5.4vw; }
 
   /* Contact */
   .mag .contact__left { gap: 2.5rem; }

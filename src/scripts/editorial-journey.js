@@ -1,29 +1,25 @@
 // =====================================================================
 // KONSTANCE KRUGER — PORTFOLIO ÉDITORIAL
-// Navigation spatiale entre les 16 doubles pages + animations d'arrivée.
+// Défilement continu (one scroll) entre les doubles pages + animations d'arrivée.
 //
-// 1. NAVIGATION (trackpad / molette)
-// Un geste de trackpad produit d'abord les événements du doigt, puis ceux de
-// l'INERTIE, qui continuent en diminuant. L'ancien script déclarait un geste
-// « terminé » après 190 ms de silence : en fin d'inertie, Safari espace ses
-// événements, d'où un deuxième saut ; et un vrai geste pendant l'inertie était
-// ignoré, d'où l'impression de blocage.
-// Ici, un nouveau geste est reconnu seulement :
-//   - après une vraie pause (250 ms), avec au moins 30 px cumulés ;
-//   - ou si l'intensité REMONTE nettement pendant l'inertie (doigt relancé).
-// Un seul écouteur « wheel », et une seule navigation à la fois.
+// 1. DÉFILEMENT
+// Toutes les doubles pages sont dans la page, l'une sous l'autre, et collées en
+// haut de l'écran (position: sticky en CSS). En défilant, la suivante monte
+// par-dessus la précédente, comme une feuille posée sur une pile. C'est le
+// défilement natif du navigateur (trackpad, molette, barre) : fluide, sans
+// blocage. Le JS règle --cover sur chaque page (0 → 1) pour la faire reculer
+// et s'assombrir pendant qu'elle est recouverte.
 //
-// 2. CAMÉRA
-// La caméra vise la position réelle de chaque double page (offsetLeft / offsetTop)
-// et prend un léger recul pendant le trajet (zoom arrière puis avant).
+// LECTURE AU DÉFILEMENT : chaque double page reste posée un moment (une « pause »
+// de défilement, ajoutée par un bloc invisible après elle). Pendant cette pause,
+// ses textes (data-reveal) s'écrivent lettre après lettre, de gauche à droite,
+// au rythme du défilement, comme si on était en train de les écrire ; quand la
+// dernière lettre est affichée, la page suivante arrive.
 //
-// 3. ANIMATIONS (inspirées de vivmgmt.com)
+// 2. ANIMATIONS (inspirées de vivmgmt.com)
 // À l'arrivée sur une double page, la classe .is-shown déclenche en CSS :
 // lettres qui sortent d'un flou, lettres qui montent, aplats qui dévoilent les
-// photos. La page d'où l'on vient garde son état jusqu'à la fin du trajet.
-//
-// LIMITE : aucun navigateur n'indique si un événement vient du doigt ou de
-// l'inertie ; la détection par l'intensité reste une estimation, la plus fiable connue.
+// photos. Elles se rejouent quand on revient sur la page.
 // =====================================================================
 
 function initializeEditorialJourney() {
@@ -53,34 +49,25 @@ function initializeEditorialJourney() {
   const mobile = window.matchMedia('(max-width: 760px)');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-  // ---------------------------------------------------------------
-  // RÉGLAGES
-  // ---------------------------------------------------------------
-  const settings = {
-    duration: 1000,         // durée du trajet entre deux doubles pages (ms)
-    zoom: 0.1,              // recul de la caméra au milieu du trajet (10 %)
-    gestureGap: 250,        // pause qui sépare deux gestes distincts (ms)
-    startDistance: 30,      // distance cumulée nécessaire pour lancer un geste (px)
-    relaunchRatio: 1.6,     // intensité 1,6 × plus forte que l'inertie = nouveau geste
-    relaunchMinimum: 18,    // … et d'au moins 18 px
-    swipeDistance: 50,      // tactile sur tablette : glissement minimal (px)
-  };
-
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
   // ---------------------------------------------------------------
   // ÉTAT
   // ---------------------------------------------------------------
   let current = 0;
-  let cameraX = 0;
-  let cameraY = 0;
-  let animationFrame = null;
-  let animating = false;
+  let frame = null;
+  let starts = [];      // position de défilement où chaque page est posée (px)
+  let dwells = [];      // longueur de la pause de lecture de chaque page (px)
+  const reveals = scenes.map((scene) => Array.from(scene.querySelectorAll('[data-reveal]')));
 
-  let gestureLocked = false;
-  let accumulated = 0;
-  let lastWheelTime = -Infinity;
-  let recentIntensity = [];
+  // Étapes d'écriture de chaque page, dans l'ordre de lecture : une lettre = une étape.
+  // Un bloc qui contient un lien ou une image apparaît d'un coup (12 étapes),
+  // pour que le lien reste lisible par les lecteurs d'écran.
+  let steps = [];
+  const shown = scenes.map(() => 0);
+
+  // Pause de lecture : un peu de défilement par texte et par lettre, plafonnée.
+  const dwellFor = (index) => clamp(0.25 + reveals[index].length * 0.08 + steps[index].length / 900, 0.4, 1.6);
 
   // ---------------------------------------------------------------
   // 1. DÉCOUPAGE DES TEXTES EN LETTRES (data-chars, data-rise)
@@ -131,6 +118,21 @@ function initializeEditorialJourney() {
   }
 
   magazine.querySelectorAll('[data-chars], [data-rise]').forEach(splitLetters);
+
+  // Textes écrits au défilement : on découpe aussi les blocs data-reveal en lettres.
+  steps = reveals.map((elements) => {
+    const list = [];
+    elements.forEach((element) => {
+      if (element.querySelector('a, button, img, svg, video')) {
+        for (let k = 0; k < 12; k += 1) list.push(k === 0 ? element : null);
+        return;
+      }
+      if (!element.querySelector('.ch')) splitLetters(element);
+      element.classList.add('is-typed');
+      element.querySelectorAll('.ch').forEach((letter) => list.push(letter));
+    });
+    return list;
+  });
 
   // ---------------------------------------------------------------
   // 2. AJUSTEMENT DES GRANDS TITRES
@@ -184,6 +186,7 @@ function initializeEditorialJourney() {
       });
 
       // Citation sur plusieurs lignes : on mesure chaque ligne sans justification.
+      const blockGroups = {};
       scene.querySelectorAll('[data-fit-block]').forEach((block) => {
         block.style.fontSize = '100px';
         block.classList.add('is-measuring');
@@ -202,34 +205,23 @@ function initializeEditorialJourney() {
             size *= room / block.offsetHeight;
             block.style.fontSize = `${size}px`;
           }
+          // Les citations d'un même groupe (data-fit-block="jpo") prennent la même taille.
+          if (block.dataset.fitBlock) (blockGroups[block.dataset.fitBlock] ||= []).push({ block, size });
         }
+      });
+
+      Object.values(blockGroups).forEach((items) => {
+        const size = Math.min(...items.map((item) => item.size));
+        items.forEach(({ block }) => (block.style.fontSize = `${size}px`));
       });
     });
   }
 
   // ---------------------------------------------------------------
-  // 3. ANIMATIONS D'ARRIVÉE
-  // ---------------------------------------------------------------
-  function show(index) {
-    scenes[index].classList.add('is-shown');
-  }
-
-  // Les autres doubles pages sont « rembobinées » une fois hors champ.
-  function rewindOthers() {
-    scenes.forEach((scene, index) => {
-      if (index !== current) scene.classList.remove('is-shown');
-    });
-  }
-
-  // ---------------------------------------------------------------
-  // 4. INTERFACE (compteur, barre, boutons, accessibilité)
+  // 3. INTERFACE (compteur, barre, boutons, accessibilité)
   // ---------------------------------------------------------------
   function updateInterface() {
-    scenes.forEach((scene, index) => {
-      const active = index === current;
-      scene.classList.toggle('is-current', active);
-      scene.inert = !mobile.matches && !active;
-    });
+    scenes.forEach((scene, index) => scene.classList.toggle('is-current', index === current));
 
     if (counter) counter.textContent = `${String(current + 1).padStart(2, '0')} / ${scenes.length}`;
     if (progress) progress.style.width = `${((current + 1) / scenes.length) * 100}%`;
@@ -241,203 +233,112 @@ function initializeEditorialJourney() {
   }
 
   // ---------------------------------------------------------------
-  // 5. CAMÉRA — translate3d + léger zoom arrière pendant le trajet.
+  // 4. EMPILEMENT ET LECTURE AU DÉFILEMENT
   // ---------------------------------------------------------------
-  function paint(scale = 1) {
-    world.style.transform = `translate3d(${-cameraX}px, ${-cameraY}px, 0)`;
-    viewport.style.transform = scale === 1 ? '' : `scale(${scale})`;
+  // Un bloc invisible après chaque page crée sa pause de lecture.
+  const spacers = scenes.map((scene) => {
+    const spacer = document.createElement('div');
+    spacer.className = 'mag__dwell';
+    spacer.setAttribute('aria-hidden', 'true');
+    scene.after(spacer);
+    return spacer;
+  });
+
+  function measure() {
+    const height = window.innerHeight;
+    let position = 0;
+    starts = [];
+    dwells = [];
+    scenes.forEach((scene, index) => {
+      const dwell = mobile.matches ? 0 : dwellFor(index) * height;
+      spacers[index].style.height = `${dwell}px`;
+      starts.push(position);
+      dwells.push(dwell);
+      position += height + dwell;
+    });
   }
 
-  function targetOf(index) {
-    const scene = scenes[index];
-    return { x: scene.offsetLeft, y: scene.offsetTop };
-  }
-
-  // Accélère puis ralentit en douceur (courbe « expo »).
-  function easeInOutExpo(t) {
-    if (t === 0 || t === 1) return t;
-    return t < 0.5 ? Math.pow(2, 20 * t - 10) / 2 : (2 - Math.pow(2, -20 * t + 10)) / 2;
-  }
-
-  function stopAnimation() {
-    if (animationFrame !== null) cancelAnimationFrame(animationFrame);
-    animationFrame = null;
-    animating = false;
-  }
-
-  function moveCamera(index, smooth) {
-    const { x: endX, y: endY } = targetOf(index);
-    stopAnimation();
-
-    if (!smooth || reducedMotion.matches) {
-      cameraX = endX;
-      cameraY = endY;
-      paint();
-      show(index);
-      rewindOthers();
-      return;
+  // Affiche les « count » premières étapes d'écriture de la page (les autres sont masquées).
+  function setWritten(index, count) {
+    const list = steps[index];
+    const target = clamp(count, 0, list.length);
+    const from = Math.min(shown[index], target);
+    const to = Math.max(shown[index], target);
+    for (let k = from; k < to; k += 1) {
+      const item = list[k];
+      if (!item) continue;
+      item.classList.toggle(item.classList.contains('ch') ? 'on' : 'is-in', k < target);
     }
+    shown[index] = target;
+  }
 
-    const startX = cameraX;
-    const startY = cameraY;
-    let startTime = null;
-    let revealed = false;
-    animating = true;
+  function update() {
+    frame = null;
+    if (mobile.matches) return;
 
-    const step = (time) => {
-      if (startTime === null) startTime = time;
-      const t = clamp((time - startTime) / settings.duration, 0, 1);
-      const eased = easeInOutExpo(t);
-      cameraX = startX + (endX - startX) * eased;
-      cameraY = startY + (endY - startY) * eased;
+    const y = window.scrollY;
+    const height = window.innerHeight;
+    let active = 0;
 
-      // Recul maximal au milieu du trajet, retour à 100 % à l'arrivée.
-      paint(1 - settings.zoom * Math.sin(Math.PI * t));
+    scenes.forEach((scene, index) => {
+      // Recouvrement par la page suivante (0 → 1) : elle monte depuis le bas.
+      const nextStart = starts[index + 1];
+      const cover = nextStart === undefined ? 0 : clamp((y - (nextStart - height)) / height, 0, 1);
+      scene.style.setProperty('--cover', cover.toFixed(3));
 
-      // Les animations de la page d'arrivée démarrent pendant l'approche.
-      if (!revealed && t > 0.55) {
-        revealed = true;
-        show(index);
+      const arrived = y >= starts[index] - height * 0.5;
+      if (arrived) active = index;
+
+      if (arrived && cover < 1) {
+        // Page à l'écran : titres et photos s'animent, puis les textes
+        // apparaissent un par un au fil de la pause de lecture.
+        scene.classList.add('is-shown');
+        // On finit d'écrire un peu avant la fin de la pause (90 %).
+        const progress = dwells[index] ? clamp((y - starts[index]) / (dwells[index] * 0.9), 0, 1) : 1;
+        setWritten(index, Math.ceil(progress * steps[index].length));
+      } else if (!arrived || y > (nextStart ?? Infinity) + height * 0.5) {
+        // Page loin (pas encore arrivée, ou bien recouverte) : on la rembobine.
+        scene.classList.remove('is-shown');
+        setWritten(index, 0);
       }
+    });
 
-      if (t < 1) {
-        animationFrame = requestAnimationFrame(step);
-      } else {
-        animationFrame = null;
-        animating = false;
-        paint();
-        rewindOthers();
-      }
-    };
+    if (active !== current) {
+      current = active;
+      updateInterface();
+    }
+  }
 
-    animationFrame = requestAnimationFrame(step);
+  function requestUpdate() {
+    if (frame === null) frame = requestAnimationFrame(update);
   }
 
   // ---------------------------------------------------------------
-  // 6. NAVIGATION
+  // 5. NAVIGATION (boutons, clavier, sommaire) — défilement doux.
   // ---------------------------------------------------------------
   function goTo(index, smooth = true) {
     const next = clamp(index, 0, scenes.length - 1);
-
+    const behavior = smooth && !reducedMotion.matches ? 'smooth' : 'auto';
     if (mobile.matches) {
-      current = next;
-      updateInterface();
-      scenes[next].scrollIntoView({ behavior: smooth && !reducedMotion.matches ? 'smooth' : 'auto' });
-      return;
+      scenes[next].scrollIntoView({ behavior });
+    } else {
+      window.scrollTo({ top: starts[next], behavior });
     }
-
-    if (next === current && smooth) return;
-    current = next;
-    updateInterface();
-    moveCamera(next, smooth);
   }
 
   const nextPage = () => goTo(current + 1);
   const previousPage = () => goTo(current - 1);
 
-  // ---------------------------------------------------------------
-  // 7. MOLETTE ET TRACKPAD — un geste = une seule double page.
-  // ---------------------------------------------------------------
-  function normalizeDelta(event) {
-    let delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
-    if (event.deltaMode === 1) delta *= 16;
-    else if (event.deltaMode === 2) delta *= window.innerHeight;
-    return delta;
-  }
-
-  function onWheel(event) {
-    if (mobile.matches) return;
-    if (event.ctrlKey || event.metaKey) return; // zoom du navigateur
-    event.preventDefault();
-
-    const delta = normalizeDelta(event);
-    const intensity = Math.abs(delta);
-    if (!Number.isFinite(delta) || intensity === 0) return;
-
-    const now = performance.now();
-    const gap = now - lastWheelTime;
-    lastWheelTime = now;
-
-    // a) Vraie pause : nouveau geste.
-    if (gap > settings.gestureGap) {
-      gestureLocked = false;
-      accumulated = 0;
-      recentIntensity = [];
-    }
-
-    // b) Geste déjà utilisé : on n'accepte qu'une relance nette du doigt.
-    if (gestureLocked) {
-      const inertiaLevel = Math.max(...recentIntensity, 0);
-      const relaunch =
-        !animating &&
-        intensity >= settings.relaunchMinimum &&
-        intensity > inertiaLevel * settings.relaunchRatio;
-
-      recentIntensity = [...recentIntensity.slice(-3), intensity];
-      if (!relaunch) return;
-      gestureLocked = false;
-      accumulated = 0;
-    }
-
-    // c) Pas de navigation empilée pendant un trajet.
-    if (animating) return;
-
-    // d) Seuil atteint : une seule double page.
-    accumulated += delta;
-    if (Math.abs(accumulated) < settings.startDistance) return;
-
-    const direction = Math.sign(accumulated);
-    gestureLocked = true;
-    accumulated = 0;
-    recentIntensity = [intensity];
-
-    if (direction > 0) nextPage();
-    else previousPage();
-  }
-
-  // ---------------------------------------------------------------
-  // 8. TACTILE SUR GRAND ÉCRAN (tablette en paysage)
-  // ---------------------------------------------------------------
-  let touchStart = null;
-
-  function onTouchStart(event) {
-    if (mobile.matches) return;
-    const touch = event.touches[0];
-    touchStart = { x: touch.clientX, y: touch.clientY };
-  }
-
-  function onTouchEnd(event) {
-    if (mobile.matches || !touchStart) return;
-    const touch = event.changedTouches[0];
-    const dx = touchStart.x - touch.clientX;
-    const dy = touchStart.y - touch.clientY;
-    touchStart = null;
-    const distance = Math.abs(dy) > Math.abs(dx) ? dy : dx;
-    if (Math.abs(distance) < settings.swipeDistance || animating) return;
-    if (distance > 0) nextPage();
-    else previousPage();
-  }
-
-  // ---------------------------------------------------------------
-  // 9. CLAVIER
-  // ---------------------------------------------------------------
   function onKeyDown(event) {
     if (mobile.matches || event.altKey || event.ctrlKey || event.metaKey) return;
     if (document.activeElement?.matches('input, textarea, select, [contenteditable="true"]')) return;
-    if (event.repeat) return;
 
-    if (['ArrowDown', 'ArrowRight', 'PageDown', ' '].includes(event.key)) {
+    if (['ArrowDown', 'ArrowRight', 'PageDown'].includes(event.key)) {
       event.preventDefault();
       nextPage();
     } else if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(event.key)) {
       event.preventDefault();
       previousPage();
-    } else if (event.key === 'Home') {
-      event.preventDefault();
-      goTo(0);
-    } else if (event.key === 'End') {
-      event.preventDefault();
-      goTo(scenes.length - 1);
     }
   }
 
@@ -515,7 +416,9 @@ function initializeEditorialJourney() {
     (entries) => {
       if (!mobile.matches) return;
       entries.forEach((entry) => {
-        if (entry.isIntersecting) entry.target.classList.add('is-shown');
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('is-shown');
+        entry.target.querySelectorAll('[data-reveal]').forEach((element) => element.classList.add('is-in'));
       });
     },
     { threshold: 0.2 }
@@ -578,31 +481,16 @@ function initializeEditorialJourney() {
   // ---------------------------------------------------------------
   function onResize() {
     fitTitles();
-    if (mobile.matches) {
-      stopAnimation();
-      world.style.transform = '';
-      viewport.style.transform = '';
-    } else {
-      moveCamera(current, false);
-    }
-    updateInterface();
-  }
-
-  // Un élément qui reçoit le focus peut faire défiler la zone : on la remet à zéro.
-  function lockViewportScroll() {
-    if (viewport.scrollTop || viewport.scrollLeft) {
-      viewport.scrollTop = 0;
-      viewport.scrollLeft = 0;
-    }
+    measure();
+    if (mobile.matches) scenes.forEach((scene) => scene.style.removeProperty('--cover'));
+    requestUpdate();
   }
 
   // ---------------------------------------------------------------
   // 15. ÉCOUTEURS — un seul de chaque type.
   // ---------------------------------------------------------------
-  window.addEventListener('wheel', onWheel, { passive: false, signal });
+  window.addEventListener('scroll', requestUpdate, { passive: true, signal });
   window.addEventListener('keydown', onKeyDown, { signal });
-  window.addEventListener('touchstart', onTouchStart, { passive: true, signal });
-  window.addEventListener('touchend', onTouchEnd, { passive: true, signal });
   window.addEventListener('resize', onResize, { passive: true, signal });
   window.addEventListener(
     'hashchange',
@@ -612,14 +500,14 @@ function initializeEditorialJourney() {
     },
     { signal }
   );
-  viewport.addEventListener('scroll', lockViewportScroll, { passive: true, signal });
   mobile.addEventListener('change', onResize, { signal });
   previousButton?.addEventListener('click', previousPage, { signal });
   nextButton?.addEventListener('click', nextPage, { signal });
 
   window.__editorialJourneyCleanup = () => {
     controller.abort();
-    stopAnimation();
+    if (frame !== null) cancelAnimationFrame(frame);
+    spacers.forEach((spacer) => spacer.remove());
     videoObserver.disconnect();
     sceneObserver.disconnect();
     window.__editorialJourneyCleanup = null;
@@ -631,20 +519,20 @@ function initializeEditorialJourney() {
   window.__magReady = true;
   fitTitles();
 
+  measure();
   const startIndex = indexFromHash();
+  if (startIndex >= 0) goTo(startIndex, false);
   current = startIndex >= 0 ? startIndex : 0;
-  if (mobile.matches && startIndex >= 0) scenes[current].scrollIntoView();
-  if (!mobile.matches) {
-    cameraX = targetOf(current).x;
-    cameraY = targetOf(current).y;
-    paint();
-  }
   updateInterface();
+  update();
 
   // On attend les polices (tailles exactes) avant de lancer l'ouverture.
   const start = () => {
     fitTitles();
-    requestAnimationFrame(() => show(current));
+    requestAnimationFrame(() => {
+      if (!mobile.matches) scenes[current].classList.add('is-shown');
+      update();
+    });
   };
   if (document.fonts?.ready) {
     Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1200))]).then(start);

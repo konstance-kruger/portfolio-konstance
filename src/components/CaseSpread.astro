@@ -1,0 +1,83 @@
+---
+// ÉTUDE DE CAS — Double page placée juste après la double page du projet, dans le même
+// parcours (pas de page séparée). Contenu : src/data/case-studies.js.
+//
+// Même langage que les autres doubles pages du magazine :
+//   Page gauche (rose) : rubrique, grand titre bâton qui remplit la largeur, sous-titre
+//     en gras et texte en capitales justifiées côte à côte, résultat en Melodrama.
+//   Page droite (blanche) : photo plein cadre avec fondu noir et légende (si le projet
+//     en a une), puis les étapes en courts paragraphes numérotés, et la fiche en bas.
+import Media from './Media.astro';
+const { study, id, style, label } = Astro.props;
+const lines = study.lines || [study.title];
+const fitMaxVh = lines.length > 2 ? 11 : 15;
+const two = (n: number) => String(n).padStart(2, '0');
+---
+<article id={id} class={`spread case${study.photo ? ' case--photo' : ''}`} data-scene style={style} aria-label={label}>
+  <div class="leaf case__left">
+    <p class="case__rubric" data-reveal style="--d:100ms">Étude de cas {study.number} — {study.org}</p>
+
+    <!-- TITRE — Chaque ligne est ajustée à la même largeur (comme CAPS, SPAC). -->
+    <h2 class="case__title" aria-label={study.title}>
+      {lines.map((line, i) => (
+        <span data-fit={`case-${study.number}`} data-fit-width="0.4" data-fit-max-vh={fitMaxVh} data-rise style={`--d:${250 + i * 120}ms`}>{line}</span>
+      ))}
+    </h2>
+
+    <!-- SOUS-TITRE — Une phrase en gras (le texte détaillé « intro » reste dans
+         les données mais n'est plus affiché : moins de texte, plus de visuel). -->
+    <div class="case__body">
+      <p class="case__subtitle" data-reveal style="--d:800ms">{study.lede}</p>
+    </div>
+
+    <!-- RÉSULTAT — Grand chiffre en Melodrama (ou le lien vers la vidéo). -->
+    {(study.result || study.link) && (
+      <div class="case__result" data-reveal style="--d:1100ms">
+        {study.result && (
+          <p class="case__stat"><strong>{study.result.stat}</strong><span>{study.result.label}</span></p>
+        )}
+        {study.link && (
+          <a class="case__link" href={study.link.href} target="_blank" rel="noopener noreferrer">{study.link.label} ↗</a>
+        )}
+      </div>
+    )}
+  </div>
+
+  <div class="leaf case__right">
+    {study.photo && (
+      <figure class="case__photo">
+        <div class="frame" data-wipe style="--wipe:var(--white);--d:250ms">
+          <Media bare file={study.photo.file} alt={study.photo.alt} label={study.title} />
+        </div>
+        <figcaption class="photo-tag case__tag" data-reveal style="--d:900ms">
+          <span class="photo-tag__title">{study.photo.tag}</span>
+          {study.photo.date && <span class="photo-tag__date">{study.photo.date}</span>}
+        </figcaption>
+      </figure>
+    )}
+
+    <!-- ÉTAPES — Courts paragraphes numérotés, en capitales justifiées. -->
+    <ol class="case__steps">
+      {study.steps.map(([title, text], i) => (
+        <li data-reveal style={`--d:${600 + i * 120}ms`}>
+          <span class="case__num" aria-hidden="true">{two(i + 1)}</span>
+          <p class="case__step-title">{title}</p>
+          <p class="case__text">{text}</p>
+        </li>
+      ))}
+    </ol>
+
+    {study.lesson.length > 0 && (
+      <div class="case__lesson" data-reveal style="--d:1100ms">
+        <p class="case__step-title">Ce que j’en retiens</p>
+        {study.lesson.map((p) => <p class="case__text">{p}</p>)}
+      </div>
+    )}
+
+    <!-- FICHE — Repères et rôle, sous un filet. -->
+    <p class="case__meta" data-reveal style="--d:1200ms">
+      <span>{study.keys.join(' · ')}</span>
+      <span>Mon rôle : {study.role}</span>
+    </p>
+  </div>
+</article>
