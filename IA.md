@@ -1,44 +1,30 @@
-# Déclaration d’usage de l’IA
+# Journal IA — résumé de mon usage de l’IA
 
-## ChatGPT / Codex — 6 novembre 2026
+## 1. Outils utilisés, étapes et rôle de chacun
+- **ChatGPT / Codex** : au départ du projet, pour clarifier le besoin et préparer la structure.
+- **Claude (Anthropic)** : pour la réalisation technique. Je lui décris précisément ce que je veux (comportement, mise en page, animation) et il écrit le code correspondant directement dans mon dossier de projet, avec mon autorisation d’accès à ce seul dossier. Je teste chaque résultat dans Safari, je lui renvoie des captures ou des vidéos pour demander des corrections, et je fais moi-même les commits et les envois sur GitHub.
 
-- Étapes : clarification du besoin, proposition de structure et préparation du développement.
-- Production : arborescence, pages HTML de départ, CSS de structure, menu JavaScript et documentation.
-- Sources : échanges avec Konstance, consigne universitaire, cahier des charges, maquettes et moodboards fournis.
-- Modifications, corrections et propositions rejetées par Konstance : à renseigner au fil de sa relecture ; aucune validation du code ne doit être présumée.
-- Compréhension et maîtrise : à vérifier ensemble avant la soutenance.
+**Qui fait quoi.** La conception est de moi : positionnement, maquettes Figma, direction artistique, choix des animations et de leur rythme, textes, photos, vidéos, affiches, dessins et mascotte (réalisée avec mon équipe). Le code (Astro, CSS, JavaScript) a été écrit par Claude à partir de mes consignes. Et j'ai demandé de mieux structuré ce journal IA à partir de ce que j'ai donné comme informations.
 
-Ajouter les autres outils et les usages réels au fur et à mesure.
+## 2. Mes prompts
+Je donne mes consignes en langage courant, souvent avec une capture d’écran ou une vidéo de référence. À l’origine, je rédige un grand prompt pour expliquer le concept, ma maquette et mes inspirations, afin que l’IA comprenne ce que je cherche réellement. Si elle fait une erreur, je lui dis précisément ce qu’il faut arranger.
 
-## Conversion technique — 6 novembre 2026
+Exemples réels :
+- « J’aime la façon dont ça transitionne, juste que les affiches arrivent moins vite. »
+- « Arrête de faire des transitions en transparence. Juste tout à droite et aligné à droite, et la même chose pile poil mais à gauche pour les logiciels. »
+- « Pour la page contact, fais-la apparaître comme si on scrollait sur la gauche, mais on scrolle vers le bas, avec les réseaux sociaux d’un côté et de l’autre un formulaire et un endroit où télécharger mon CV. »
+- « Relis tout l’énoncé du prof et dis-moi ce qui va et ce qui ne va pas. »
 
-À la demande de Konstance : remplacement du socle HTML par Astro, composants partagés, JavaScript et intégration Tailwind/DaisyUI avec thème personnalisé. Documentation adaptée.
+## 3. Ce que l’IA m’a apporté
+- Transformer mes maquettes Figma en code Astro, CSS et JavaScript, et me faire gagner un temps énorme sur les animations liées au défilement (textes qui s’écrivent, transitions des affiches, page À propos puis Contact, stickers déplaçables).
+- Un audit complet de mon site par rapport à l’énoncé (accessibilité, performance, mentions légales, code inutile) pour m’assurer de répondre à toutes les consignes.
+- Des propositions de concepts pour les animations, parmi lesquelles j’ai choisi.
+- Des explications du code, pour pouvoir le défendre.
 
-## Développement de l’accueil — 6 novembre 2026
+## 4. Ce que j’ai dû corriger, rejeter ou imposer
+- **Propositions rejetées :** un site qui ne respectait pas mes maquettes, le rose corail, des objets décoratifs inventés ; pour la page À propos, les cercles de langues, les éléments qui tombent, la carte avec stickers (« c’est moche »), le cadre autour du texte, un texte trop long, des compétences présentées comme un sommaire.
+- **Réglages imposés :** compétences et logiciels en simple texte, en alternant Melodrama et General Sans ; compétences à droite, logiciels à gauche ; apparition une par une ; aucune transition en transparence ; arrivée des affiches ralentie ; billet du hero sans texte ; menu et sous-menus de mon choix ; écran de chargement testé puis abandonné parce qu’il ne me convenait pas.
+- **Erreurs techniques à faire corriger :** texte du billet qui débordait dans Safari, images qui ne s’affichaient pas, page À propos qui s’effondrait, sous-menus mal alignés, contrastes insuffisants, ballon dessiné déformé, affiches mal affichées sur mobile, police d’essai non publiable remplacée par une police libre.
 
-Création des composants Hero, Presentation, Projects, Contact et Media. Parcours vertical, palette exacte et navigation par ancres. Révélations simples avec IntersectionObserver ; transformation du Hero et animation de cadrage encore à développer. Polices de secours provisoires, coordonnées et médias non fournis.
-
-## Hero et blanc pur
-Recomposition du Hero depuis la maquette : prénom fin, nom gras incliné, ovale lime, accent PASSION rose. Fonds beiges remplacés par #FFFFFF. Familles chargées via Fontshare ; Melodrama inclinée par le navigateur. Objets originaux encore à fournir (hero-tshirt.webp, hero-ticket.webp, hero-etoile.webp, hero-television.webp).
-
-## Claude (Anthropic) — novembre 2026
-
-Outil : Claude, assistant d’Anthropic. Il a écrit directement les fichiers dans le dossier du projet, avec mon autorisation d’accès à ce seul dossier. Je teste dans Safari et je commit / pousse moi-même sur GitHub.
-
-### Étapes et usages
-- 6–16 novembre : intégration de mes maquettes en magazine, contrôle du cahier des charges, mise en ligne (voir JOURNAL.md).
-- 17–19 novembre : nouvelle direction artistique « grille » : transitions au défilement, À propos, Contact, menu, billet du hero ; audit de l’énoncé ; correction de l’accessibilité, des mentions légales, nettoyage et commentaires du code.
-
-### Ce que Claude a produit
-- `src/components/GridSite.astro`, `src/styles/grid-site.css`, `src/scripts/grid-site.js` (toute la longue page), `Media.astro`, `BaseLayout.astro`, mentions légales, documents du dépôt.
-- Les photos, vidéos, dessins, affiches, mascotte, textes de présentation et choix de design viennent de moi et de mon équipe.
-
-### Ce que j’ai rejeté, corrigé ou imposé
-- J’ai rejeté la première proposition (page sans mes maquettes), le rose corail, les objets décoratifs, puis, pour la page À propos : les cercles de langues, les éléments qui tombent, la carte avec stickers (« c’est moche »), le cadre autour du texte, le texte trop long (réduit à : 19 ans, cheffe de projet, BUT 2), les compétences présentées comme un sommaire.
-- J’ai imposé : compétences et logiciels en simple texte (Melodrama / General Sans en alternance), à droite pour les compétences et à gauche pour les logiciels, apparition une par une, aucune transition en transparence ; Contact qui arrive depuis la droite ; formulaire blanc encadré aux couleurs du site ; menu et sous-menus de mon choix ; billet du hero sans texte.
-- J’ai ralenti l’arrivée des colonnes d’affiches (seulement à l’entrée, pas pendant le défilement).
-- Textes : ils viennent de moi (qualités, parcours, objectif). Claude les a seulement mis en forme.
-- Police « PASSION » : Dirty Stains DEMO retirée (licence), remplacée par Rubik Spray Paint (OFL), que j’ai validée.
-
-### Compréhension et maîtrise
-À savoir expliquer : voir la liste « Notions à savoir expliquer » dans `docs/SOUTENANCE.md` (variables CSS pilotées par le défilement, `position: sticky`, `IntersectionObserver`, texte lettre par lettre, `prefers-reduced-motion`, Netlify Forms).
+## 5. Ce que je comprends et sais expliquer
+Je m’entraîne à expliquer : les variables CSS pilotées par le défilement, `position: sticky`, `IntersectionObserver`, le texte lettre par lettre, `prefers-reduced-motion`, Netlify Forms. Le détail est dans `docs/SOUTENANCE.md`, et `grid-site.js` commence par un guide de lecture. Je ne revendique que le niveau technique que je sais défendre devant le jury.

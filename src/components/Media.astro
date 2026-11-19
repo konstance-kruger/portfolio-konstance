@@ -1,82 +1,26 @@
 ---
-// MÉDIAS — Affiche une image (ou une vidéo) de public/assets/ si le fichier existe,
-// sinon un emplacement réservé clairement identifié. Aucun visuel n'est inventé.
-//
-// CORRECTION IMPORTANTE : l'ancienne version cherchait le fichier avec
-// new URL('../../public/…', import.meta.url). Au moment du build, Astro déplace ce
-// composant dans un dossier temporaire : le chemin relatif ne menait plus à public/
-// et TOUTES les images étaient remplacées par des emplacements vides.
-// On part maintenant de process.cwd(), c'est-à-dire la racine du projet.
-//
+// MÉDIAS — Affiche une image, ou une vidéo muette en boucle (l'image sert alors d'affiche).
 // Props :
-// - file     : image depuis public/assets/images/ (ex. "caps/caps-cover.webp")
-// - alt      : texte alternatif
-// - label    : texte affiché dans l'emplacement réservé
-// - portrait : (anciennes pages) cadre vertical 4:5
-// - bare     : true → affiche l'image seule, sans <figure class="media-frame">.
-//              Utilisé par la longue page : c’est le CSS de chaque bloc qui
-//              dimensionne le cadre, sans être perturbé par les règles générales.
-// - video    : vidéo depuis public/assets/videos/ (ex. "nuit-du-sport.mp4").
-//              Si elle existe, elle remplace l'image (qui devient son affiche).
-// - fit      : "cover" (remplit le cadre, par défaut) ou "contain" (image entière)
-// - sound    : false → vidéo d'ambiance, toujours muette, sans bouton « Activer le son »,
-//              lancée automatiquement par le navigateur (attribut autoplay)
+// - file  : image dans public/assets/images/ (ex. "caps/caps-equipe.webp")
+// - alt   : texte alternatif lu par les lecteurs d'écran
+// - video : vidéo dans public/assets/videos/ (ex. "caps-presentation.mp4") ; si elle existe, elle remplace l'image
+// - fit   : "cover" (remplit le cadre, par défaut) ou "contain" (image entière)
+// Le fichier est cherché depuis la racine du projet (process.cwd()) au moment du build.
+// La lecture et la pause des vidéos sont gérées par grid-site.js (IntersectionObserver).
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 
-const {
-  file,
-  alt = '',
-  label = 'Média à ajouter',
-  portrait = false,
-  bare = false,
-  video = '',
-  fit = 'cover',
-  sound = true,
-} = Astro.props;
+const { file, alt = '', video = '', fit = 'cover' } = Astro.props;
 
 const root = process.cwd();
-const imageExists = file ? existsSync(path.join(root, 'public/assets/images', file)) : false;
 const videoExists = video ? existsSync(path.join(root, 'public/assets/videos', video)) : false;
-
 const imageSrc = `/assets/images/${file}`;
 const videoSrc = `/assets/videos/${video}`;
 ---
-{bare ? (
-  videoExists ? (
-    <div class:list={['media', 'media--video', `media--${fit}`]} data-video-frame>
-      <!-- VIDÉO — Muette, en boucle, lue seulement quand sa double page est affichée. -->
-      <video
-        src={videoSrc}
-        poster={imageExists ? imageSrc : undefined}
-        muted
-        loop
-        playsinline
-        autoplay={!sound}
-        preload={sound ? 'none' : 'auto'}
-        aria-label={alt}
-        data-video
-      ></video>
-      {sound && (
-        <button class="media__sound" type="button" aria-pressed="false" data-video-sound>
-          Activer le son
-        </button>
-      )}
-    </div>
-  ) : imageExists ? (
-    <img class:list={['media', `media--${fit}`]} src={imageSrc} alt={alt} loading="lazy" decoding="async" />
-  ) : (
-    <div class="media media--placeholder" role="img" aria-label={`${label} (image à venir)`}>
-      <span>{label}</span>
-      <small>{file}</small>
-    </div>
-  )
+{videoExists ? (
+  <div class:list={['media', 'media--video', `media--${fit}`]}>
+    <video src={videoSrc} poster={imageSrc} muted loop playsinline preload="none" aria-label={alt}></video>
+  </div>
 ) : (
-  <figure class:list={['media-frame', { portrait }]}>
-    {imageExists ? (
-      <img src={imageSrc} alt={alt} loading="lazy" width={portrait ? 800 : 1200} height={portrait ? 1000 : 800} />
-    ) : (
-      <div class="media-placeholder"><span aria-hidden="true">↗</span><p>{label}</p><small>{file}</small></div>
-    )}
-  </figure>
+  <img class:list={['media', `media--${fit}`]} src={imageSrc} alt={alt} loading="lazy" decoding="async" />
 )}

@@ -49,3 +49,11 @@ Recomposition du Hero depuis la maquette : prénom fin, nom gras incliné, ovale
 - Constat : le CSS contenait des règles mortes qui déformaient le ballon dessiné (cercles abandonnés) ; corrigé en les supprimant.
 - Fusion de da-grille dans main : voir ci-dessous une fois faite.
 - Reste à faire : CV PDF, activation de Netlify Forms, tests Safari / iPhone / VoiceOver sur le site en ligne.
+
+## Choix des réseaux sociaux (justification demandée par la consigne)
+
+- **LinkedIn** : c’est là que les structures événementielles, les sociétés de production et les médias cherchent des stagiaires et des alternants ; c’est mon réseau professionnel principal.
+- **Instagram** : mes projets CAPS et SPAC (événements, affiches, coulisses) y sont visuels et vivants ; il montre ma créativité et touche mon réseau étudiant.
+- Ces deux comptes sont cohérents avec mon positionnement (cheffe de projet événementiel / audiovisuel) et sont reliés depuis la page Contact du portfolio.
+- Behance ou Dribbble ne s’imposent pas : mes affiches sont des travaux personnels secondaires, pas mon cœur de métier visé.
+- Contenus à mettre à jour sur les deux comptes : photo, description cohérente avec le portfolio, lien vers portfolio.kkruger.fr.

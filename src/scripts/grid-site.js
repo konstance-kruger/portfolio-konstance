@@ -31,7 +31,12 @@
 function initGridSite() {
   const root = document.querySelector('[data-gs]');
   if (!root) return;
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // MODE SIMPLE — Les animations sont coupées si la personne l'a demandé dans son système
+  // (prefers-reduced-motion) OU sur téléphone (écran étroit) : la page s'affiche alors
+  // directement, sans texte qui s'écrit, sans parallaxe, sans transitions au défilement.
+  // Avantages : plus lisible, moins de calculs, batterie et données économisées.
+  const small = window.matchMedia('(max-width: 760px)').matches;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches || small;
 
 
   // 0. ACCUEIL — Chaque texte à data-box occupe exactement la boîte relevée sur
@@ -284,6 +289,8 @@ function initGridSite() {
     v.setAttribute('muted', '');
     v.setAttribute('playsinline', '');
     v.setAttribute('autoplay', '');
+    // Sur téléphone, la vidéo n'est pas téléchargée (2 Mo) : on garde son image d'affiche.
+    if (small) { v.removeAttribute('autoplay'); v.preload = 'none'; return; }
     v.preload = 'auto';
     v.load();
     v.addEventListener('canplay', () => {

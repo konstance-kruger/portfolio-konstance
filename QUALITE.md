@@ -20,7 +20,8 @@ Site : une seule longue page très visuelle (photos, vidéo, animations au défi
 
 | Critère | Vérification | Résultat / correction |
 | --- | --- | --- |
-| Poids du site | Dossier `dist` (19/11) | 8,3 Mo → 4,9 Mo : vidéo 4,3 → 2,3 Mo, fichiers inutilisés et police d’essai supprimés |
+| Poids du site | Dossier `dist` (19/11) | 8,3 Mo → 4,4 Mo : vidéo 4,3 → 2,3 Mo, canette PNG → WebP (362 → 26 Ko), police du mot « Passion » réduite à ses lettres (120 → 9 Ko), photo trop grande redimensionnée, fichiers inutilisés supprimés |
+| Téléphone | Écran ≤ 760 px | Mode simple : pas de texte lettre par lettre, de parallaxe ni de transitions ; la vidéo n’est pas téléchargée (image d’affiche à la place) ; moins de calculs, de données et de batterie |
 | Polices | Fontshare (3 feuilles) | Chargées sans bloquer l’affichage (`media="print"` + `onload`) ; police du mot « Passion » hébergée (≈ 15 Ko) |
 | Code inutile | Analyse des classes CSS non utilisées | CSS 87 Ko → 65 Ko, anciennes pages et scripts supprimés, JS « cercles » retiré |
 | Images | WebP, `loading="lazy"` | Présent |

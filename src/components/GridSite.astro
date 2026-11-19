@@ -17,27 +17,14 @@ import { skills, tools } from '../data/skills.js';
 
 const exists = (file) => existsSync(nodePath.join(process.cwd(), 'public/assets/images', file));
 
-// CRÉATIONS — Miniatures de nos vidéos CAPS.
-// url : lien YouTube de la vidéo. À remplir ; tant qu'il est vide, la miniature
-// s'agrandit au survol mais n'affiche pas de lien.
-const creations = [
-  { file: 'creations/la-rediff-valorant.webp', title: 'La rediff — Valorant', url: '', alt: 'Miniature « La rediff » du tournoi Valorant' },
-  { file: 'creations/capzzz-night.webp', title: 'Cap’zzz night', url: '', alt: 'Visuel « Cap’zzz night » avec les membres de CAPS en cartes à jouer' },
-  { file: 'creations/podcaps-nostalgie.webp', title: 'Podcaps Nostalgie', url: '', alt: 'Miniature « Podcaps Nostalgie »' },
-  { file: 'creations/nuit-du-volley.webp', title: 'Nuit du volley', url: '', alt: 'Visuel « Nuit du volley » avec l’équipe CAPS' },
-  { file: 'creations/tournoi-mario-kart.webp', title: 'Tournoi Mario Kart', url: '', alt: 'Illustration du tournoi Mario Kart' },
-].filter((c) => exists(c.file));
 // AFFICHES — Rectangle blanc qui monte, avec des colonnes d'affiches qui défilent à des vitesses
 // différentes. Déposer les affiches dans public/assets/images/affiches/ (webp, jpg ou png) :
-// elles apparaissent toutes seules. Tant que le dossier est vide, les miniatures de créations
-// servent de remplaçants provisoires.
+// elles apparaissent toutes seules (la liste est lue au moment du build).
 const posterDir = nodePath.join(process.cwd(), 'public/assets/images/affiches');
 const posterFiles = existsSync(posterDir)
   ? readdirSync(posterDir).filter((f) => /\.(webp|jpe?g|png)$/i.test(f)).sort()
   : [];
-const posters = posterFiles.length
-  ? posterFiles.map((f) => ({ src: `/assets/images/affiches/${f}`, alt: 'Affiche réalisée par Konstance Kruger' }))
-  : creations.map((cr) => ({ src: `/assets/images/${cr.file}`, alt: '' }));
+const posters = posterFiles.map((f) => ({ src: `/assets/images/affiches/${f}`, alt: 'Affiche réalisée par Konstance Kruger' }));
 const riseK = [1.1, 2.0, 0.9, 1.3, 0.75];     // vitesse de chaque colonne
 const riseLag = ['0rem', '9rem', '4rem', '13rem', '6rem'];
 const riseCols = riseK.map((k, ci) => {
@@ -50,6 +37,36 @@ const riseCols = riseK.map((k, ci) => {
 });
 ---
 <div class="gs" data-gs>
+  <!-- ÉCRAN DE CHARGEMENT — Les stickers du hero arrivent l'un après l'autre et s'empilent,
+       puis l'écran glisse vers le haut et découvre la page. Purement décoratif (aria-hidden).
+       Le petit script juste dessous l'active seulement si les animations sont permises ;
+       sans JavaScript, l'écran reste caché et la page s'affiche directement. -->
+  <div class="gs-loader" aria-hidden="true">
+    <img class="gs-loader__s gs-loader__s--1" src="/assets/images/hero-shirt.png" alt="" />
+    <img class="gs-loader__s gs-loader__s--2" src="/assets/images/hero-ticket.png" alt="" />
+    <img class="gs-loader__s gs-loader__s--3" src="/assets/images/hero-star.png" alt="" />
+    <img class="gs-loader__s gs-loader__s--4" src="/assets/images/hero-camera.png" alt="" />
+  </div>
+  <script is:inline>
+    (function () {
+      var loader = document.querySelector('.gs-loader');
+      if (!loader || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      var root = document.documentElement;
+      root.classList.add('js-load');                 // affiche l'écran et bloque le défilement
+      var start = Date.now();
+      var MIN = 5000;                                // durée minimale : 5 secondes
+      var finished = false;
+      function finish() {
+        if (finished) return;
+        finished = true;
+        loader.classList.add('is-done');             // l'écran glisse vers le haut
+        setTimeout(function () { root.classList.remove('js-load'); loader.remove(); }, 900);
+      }
+      function ready() { setTimeout(finish, Math.max(0, MIN - (Date.now() - start))); }
+      if (document.readyState === 'complete') ready(); else window.addEventListener('load', ready);
+      setTimeout(finish, 7000);                      // sécurité : jamais plus de 7 s
+    })();
+  </script>
   <!-- ============================ ACCUEIL ============================ -->
   <header id="accueil" class="gs-hero">
     <!-- CADRE — Garde les proportions de la maquette (1280 × 832) et tient
@@ -110,7 +127,7 @@ const riseCols = riseK.map((k, ci) => {
       <!-- COUVERTURE — Vidéo plein écran, « CAPS » rose poudré, texte blanc à droite. -->
       <div class="gs-cover-pin">
         <div class="gs-cover gs-cover--caps">
-        <Media bare file="caps/caps-presentation.webp" video="caps-presentation.mp4" sound={false} alt="Vidéo de présentation de CAPS" label="CAPS" />
+        <Media file="caps/caps-presentation.webp" video="caps-presentation.mp4" alt="Vidéo de présentation de CAPS" />
         <h2 id="caps-title" class="gs-cover__title">CAPS</h2>
         <p class="gs-cover__text" data-type>
           Est une association étudiante fondée en janvier 2026 pour créer des <strong>contenus audiovisuels et événementiels.</strong>
@@ -126,18 +143,18 @@ const riseCols = riseK.map((k, ci) => {
             Avec CAPS, chaque live commence bien avant l’antenne : on installe les caméras,
             on tire les câbles et on monte une <strong>régie complète.</strong>
           </p>
-          {exists('objects/caps-can.png') && (
-            <img data-drag class="gs-story__can" src="/assets/images/objects/caps-can.png" alt="" aria-hidden="true" />
+          {exists('objects/caps-can.webp') && (
+            <img data-drag class="gs-story__can" src="/assets/images/objects/caps-can.webp" alt="" aria-hidden="true" />
           )}
           <figure class="gs-photo gs-story__p1" data-wipe data-speed="0.82">
-            <Media bare file="caps/nuit-du-sport-coulisses.webp" alt="La régie installée pour une Nuit du sport" label="Régie" />
+            <Media file="caps/nuit-du-sport-coulisses.webp" alt="La régie installée pour une Nuit du sport" />
             <figcaption class="gs-label">En régie</figcaption>
           </figure>
           <p class="gs-bubble gs-story__b2" data-type data-speed="1.14">
             Nos directs passent sur Twitch, et les rediffusions sont publiées sur YouTube.
           </p>
           <figure class="gs-photo gs-story__p2" data-wipe data-speed="0.78">
-            <Media bare file="caps/podcast-coulisses.webp" alt="Le plateau d'un podcast CAPS avec ses caméras" label="Plateau" />
+            <Media file="caps/podcast-coulisses.webp" alt="Le plateau d'un podcast CAPS avec ses caméras" />
             <figcaption class="gs-label">Sur le plateau</figcaption>
           </figure>
           <p class="gs-bubble gs-story__b3" data-type data-speed="1.14">
@@ -153,14 +170,14 @@ const riseCols = riseK.map((k, ci) => {
         <div id="nuits-du-sport" class="gs-screen gs-screen--sport" data-drop>
           <h3 class="gs-block-title gs-screen__title">Nuits du sport</h3>
           <figure class="gs-photo gs-screen__a" data-wipe>
-            <Media bare file="caps/caps-equipe.webp" alt="L'équipe CAPS réunie lors de la Nuit du futsal" label="Nuit du futsal" />
+            <Media file="caps/caps-equipe.webp" alt="L'équipe CAPS réunie lors de la Nuit du futsal" />
             <figcaption class="gs-label">La nuit du futsal</figcaption>
           </figure>
           <p class="gs-bubble gs-screen__text" data-type>
             Les « Nuits du sport » : un live Twitch du tournoi, commenté comme si les joueurs étaient de vrais professionnels. <strong>Futsal et volley, en direct de 18 h à 00 h.</strong>
           </p>
           <figure class="gs-photo gs-screen__b" data-wipe>
-            <Media bare file="caps/nuit-du-sport-cover.webp" alt="Un joueur smashe au filet pendant la Nuit du volley" label="Nuit du volley" />
+            <Media file="caps/nuit-du-sport-cover.webp" alt="Un joueur smashe au filet pendant la Nuit du volley" />
             <figcaption class="gs-label">La nuit du volley</figcaption>
           </figure>
           <!-- DESSIN — Mon ballon enflammé (déplaçable). -->
@@ -197,7 +214,7 @@ const riseCols = riseK.map((k, ci) => {
              micro qui tombe du haut à droite, sous-titre et texte en dessous. -->
         <div class="gs-pod" data-drop>
           <figure class="gs-pod__photo" data-wipe>
-            <Media bare file="caps/podcast-cover.webp" alt="L'équipe CAPS pendant l'enregistrement d'un podcast" label="Podcast" />
+            <Media file="caps/podcast-cover.webp" alt="L'équipe CAPS pendant l'enregistrement d'un podcast" />
             {exists('caps/dessin-podcast.png') && (
               <img class="gs-pod__hands" src="/assets/images/caps/dessin-podcast.png" alt="" aria-hidden="true" />
             )}
@@ -235,20 +252,20 @@ const riseCols = riseK.map((k, ci) => {
         <div class="gs-screen gs-screen--sport gs-screen--esport">
           <h3 class="gs-block-title gs-screen__title">Tournois e-sport</h3>
           <figure class="gs-photo gs-screen__a" data-wipe>
-            <Media bare file="caps/esport-cover.webp" alt="La régie pendant le tournoi Mario Kart" label="Tournoi Mario Kart" />
+            <Media file="caps/esport-cover.webp" alt="La régie pendant le tournoi Mario Kart" />
             <figcaption class="gs-label">Tournoi Mario Kart</figcaption>
           </figure>
           <p class="gs-bubble gs-screen__text" data-type>
             On organise des événements qu’on nous réclame : <strong>rassembler et divertir</strong> via le matériel e-sport à disposition dans notre département en MMI.
           </p>
           <figure class="gs-photo gs-screen__b" data-wipe>
-            <Media bare file="caps/esport-regie.webp" alt="Les joueurs pendant le tournoi Valorant, filmés par une caméra" label="Tournoi Valorant" />
+            <Media file="caps/esport-regie.webp" alt="Les joueurs pendant le tournoi Valorant, filmés par une caméra" />
             <figcaption class="gs-label">Tournoi Valorant</figcaption>
           </figure>
         </div>
         </div>
       <div class="gs-cover gs-cover--campus">
-        <Media bare file="campus/vie-au-campus.webp" alt="Konstance éclate un ballon sur la tête d'une amie pendant un événement du campus" label="Vie au campus" />
+        <Media file="campus/vie-au-campus.webp" alt="Konstance éclate un ballon sur la tête d'une amie pendant un événement du campus" />
         <h2 id="campus-title" class="gs-cover__title">Vie au<br />campus</h2>
         <p class="gs-cover__text" data-type>
           Mon objectif est d’aider ma filière à se rassembler mais aussi le campus. Dynamiser
@@ -269,7 +286,7 @@ const riseCols = riseK.map((k, ci) => {
         <h3 id="spac" class="gs-block-title gs-block-title--hug"><span>SPAC</span></h3>
         <div class="gs-spac">
           <figure class="gs-photo gs-photo--left gs-photo--tall" data-wipe data-speed="0.86">
-            <Media bare file="spac/spac-photo.webp" alt="Deux membres de SPAC posent avec une pancarte en carton SPAC au festival de rentrée" label="SPAC" />
+            <Media file="spac/spac-photo.webp" alt="Deux membres de SPAC posent avec une pancarte en carton SPAC au festival de rentrée" />
             <figcaption class="gs-label">Festival de rentrée</figcaption>
           </figure>
           <div class="gs-spac__copy" data-speed="1.12">
@@ -301,7 +318,7 @@ const riseCols = riseK.map((k, ci) => {
             </blockquote>
           </div>
           <figure class="gs-photo gs-jpo__photo" data-wipe>
-            <Media bare file="webtv/jpo.webp" alt="Konstance sur le plateau de la WebTV pendant la journée portes ouvertes" label="Journée portes ouvertes" />
+            <Media file="webtv/jpo.webp" alt="Konstance sur le plateau de la WebTV pendant la journée portes ouvertes" />
             <figcaption class="gs-label gs-jpo__tag"><span>Journée portes ouvertes</span><small>26 janv 2026</small></figcaption>
           </figure>
         </div>
@@ -332,7 +349,7 @@ const riseCols = riseK.map((k, ci) => {
         <h3 id="inoui" class="gs-block-title gs-block-title--hug"><span>Festival Inoui</span></h3>
         <div class="gs-inoui">
           <figure class="gs-photo gs-inoui__a" data-wipe data-speed="0.86">
-            <Media bare file="inoui/conference.webp" alt="Le tournage d'une conférence du Festival Inouï dans un amphithéâtre" label="Conférence" />
+            <Media file="inoui/conference.webp" alt="Le tournage d'une conférence du Festival Inouï dans un amphithéâtre" />
             <figcaption class="gs-label">Conférence</figcaption>
           </figure>
           <p class="gs-bubble gs-inoui__text" data-type data-speed="1.12">
@@ -340,7 +357,7 @@ const riseCols = riseK.map((k, ci) => {
             en filmant des conférences et en tant qu’animatrice pour la WebTV.
           </p>
           <figure class="gs-photo gs-inoui__b" data-wipe data-speed="0.86">
-            <Media bare file="inoui/radio-campus.webp" alt="Le studio de Radio Campus pendant le Festival Inouï" label="Radio Campus" />
+            <Media file="inoui/radio-campus.webp" alt="Le studio de Radio Campus pendant le Festival Inouï" />
             <figcaption class="gs-label">Radio Campus · 30 mai 2026</figcaption>
           </figure>
         </div>
