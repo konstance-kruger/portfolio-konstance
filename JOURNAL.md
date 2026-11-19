@@ -39,3 +39,13 @@ Recomposition du Hero depuis la maquette : prénom fin, nom gras incliné, ovale
 - Mise en ligne : nom de domaine kkruger.fr (Infomaniak), sous-domaine portfolio.kkruger.fr. Le VPS de l’école prévu en cours étant bloqué, décision d’héberger le site sur Netlify (HTTPS automatique) ; le DNS du sous-domaine pointe vers Netlify.
 - Dépôt GitHub créé et rendu public : https://github.com/konstance-kruger/portfolio-konstance. Netlify est relié au dépôt : chaque envoi (Sync Changes) republie le site.
 - HTTPS : premier échec du certificat Let’s Encrypt (« We could not provision a certificate ») car le domaine n’était pas encore ajouté dans Netlify. Après ajout de portfolio.kkruger.fr dans Domain management et vérification du DNS (CNAME seul, aucun enregistrement CAA bloquant), certificat obtenu. Site en ligne sur https://portfolio.kkruger.fr, domaine principal du projet Netlify.
+
+## 17–19 novembre 2026 — nouvelle direction artistique « grille » (branche da-grille)
+
+- Abandon du magazine en doubles pages pour une longue page : fond quadrillé, menu collé en haut, parallaxe, textes qui s’écrivent au défilement, stickers déplaçables.
+- Transition des affiches (5 colonnes qui montent à des vitesses différentes), nouvelle page À propos en trois temps (présentation, compétences à droite, logiciels à gauche), page Contact qui arrive par la droite (réseaux, formulaire, CV), menu avec sous-menus au survol, billet du hero en papier.
+- Décisions de Konstance : suppression des éléments qui tombent et des cercles de langues ; pas de transitions en transparence sur À propos ; pas de texte sur le billet ; photos en couleur d’origine.
+- 19 novembre : audit complet par rapport à l’énoncé. Corrections : mentions légales réécrites (formulaire Netlify, polices, crédits), police d’essai Dirty Stains DEMO remplacée par Rubik Spray Paint (licence libre), contrastes, texte lisible par les lecteurs d’écran, double `<main>` supprimé, polices non bloquantes, vidéo 4,3 → 2,3 Mo, suppression des anciennes pages et du CSS/JS inutilisés (CSS −25 %), commentaires ajoutés dans le code.
+- Constat : le CSS contenait des règles mortes qui déformaient le ballon dessiné (cercles abandonnés) ; corrigé en les supprimant.
+- Fusion de da-grille dans main : voir ci-dessous une fois faite.
+- Reste à faire : CV PDF, activation de Netlify Forms, tests Safari / iPhone / VoiceOver sur le site en ligne.

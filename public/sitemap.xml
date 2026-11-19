@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- PLAN DU SITE — Les deux seules vraies pages : le magazine et les mentions légales.
-     Les anciennes adresses (/caps/, /spac/…) redirigent vers le magazine et n'y figurent pas. -->
+<!-- PLAN DU SITE — Les deux seules vraies pages : le portfolio et les mentions légales.
+     Les anciennes adresses (/caps/, /spac/…) redirigent vers la page unique et n'y figurent pas. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://portfolio.kkruger.fr/</loc>
-    <lastmod>2026-11-16</lastmod>
+    <lastmod>2026-11-19</lastmod>
   </url>
   <url>
     <loc>https://portfolio.kkruger.fr/mentions-legales/</loc>
-    <lastmod>2026-11-16</lastmod>
+    <lastmod>2026-11-19</lastmod>
   </url>
 </urlset>

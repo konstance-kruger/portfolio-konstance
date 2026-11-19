@@ -1,0 +1,27 @@
+---
+// ÉTUDE DE CAS (nouvelle DA) — Carte sur fond quadrillé : chapô, frise de la démarche,
+// résultat (ou lien) sur fond lime, repères et rôle. Contenu : src/data/case-studies.js.
+const { study } = Astro.props;
+const two = (n) => String(n).padStart(2, '0');
+---
+<article class="gs-case" aria-label={`Étude de cas : ${study.title}`}>
+  <p class="gs-case__tag">Étude de cas {study.number} — {study.title}</p>
+  <p class="gs-case__lede" data-type>{study.lede}</p>
+  {study.frise && (
+    <ol class="gs-case__frise">
+      {study.frise.map(([mark, word]) => (
+        <li data-drop>
+          <span class="gs-case__mark">{mark}</span>
+          <span class="gs-case__word">{word}</span>
+        </li>
+      ))}
+    </ol>
+  )}
+  {study.result && (
+    <p class="gs-case__stat"><strong>{study.result.stat}</strong> <span>{study.result.label}</span></p>
+  )}
+  {!study.result && study.link && (
+    <a class="gs-case__stat gs-case__link" href={study.link.href} target="_blank" rel="noopener noreferrer">{study.link.label} ↗</a>
+  )}
+  <p class="gs-case__meta">{study.keys.join(' · ')} — Mon rôle : {study.role}</p>
+</article>

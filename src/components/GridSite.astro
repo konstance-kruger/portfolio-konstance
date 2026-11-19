@@ -1,0 +1,455 @@
+---
+// =====================================================================
+// NOUVELLE DA « GRILLE » (branche da-grille) — une seule longue page.
+// Fond quadrillé, stickers, bulles de texte à coins roses (viseur de caméra),
+// photos en quinconce, grands en-têtes photo / vidéo avec titre lime + sous-titre rose.
+// Polices : Melodrama + General Sans. Textes : ceux du portfolio.
+//
+// Ordre : Accueil → CAPS (vidéo + texte) → Nuits du sport → Podcast → Tournois
+//         → Vie au campus (photo du ballon) → SPAC → JPO → Festival Inoui
+//         (la bande des miniatures CAPS défile sous la couverture CAPS).
+// =====================================================================
+import { existsSync, readdirSync } from 'node:fs';
+import nodePath from 'node:path';
+import Media from './Media.astro';
+import { profile } from '../data/profile.js';
+import { skills, tools } from '../data/skills.js';
+
+const exists = (file) => existsSync(nodePath.join(process.cwd(), 'public/assets/images', file));
+
+// CRÉATIONS — Miniatures de nos vidéos CAPS.
+// url : lien YouTube de la vidéo. À remplir ; tant qu'il est vide, la miniature
+// s'agrandit au survol mais n'affiche pas de lien.
+const creations = [
+  { file: 'creations/la-rediff-valorant.webp', title: 'La rediff — Valorant', url: '', alt: 'Miniature « La rediff » du tournoi Valorant' },
+  { file: 'creations/capzzz-night.webp', title: 'Cap’zzz night', url: '', alt: 'Visuel « Cap’zzz night » avec les membres de CAPS en cartes à jouer' },
+  { file: 'creations/podcaps-nostalgie.webp', title: 'Podcaps Nostalgie', url: '', alt: 'Miniature « Podcaps Nostalgie »' },
+  { file: 'creations/nuit-du-volley.webp', title: 'Nuit du volley', url: '', alt: 'Visuel « Nuit du volley » avec l’équipe CAPS' },
+  { file: 'creations/tournoi-mario-kart.webp', title: 'Tournoi Mario Kart', url: '', alt: 'Illustration du tournoi Mario Kart' },
+].filter((c) => exists(c.file));
+// AFFICHES — Rectangle blanc qui monte, avec des colonnes d'affiches qui défilent à des vitesses
+// différentes. Déposer les affiches dans public/assets/images/affiches/ (webp, jpg ou png) :
+// elles apparaissent toutes seules. Tant que le dossier est vide, les miniatures de créations
+// servent de remplaçants provisoires.
+const posterDir = nodePath.join(process.cwd(), 'public/assets/images/affiches');
+const posterFiles = existsSync(posterDir)
+  ? readdirSync(posterDir).filter((f) => /\.(webp|jpe?g|png)$/i.test(f)).sort()
+  : [];
+const posters = posterFiles.length
+  ? posterFiles.map((f) => ({ src: `/assets/images/affiches/${f}`, alt: 'Affiche réalisée par Konstance Kruger' }))
+  : creations.map((cr) => ({ src: `/assets/images/${cr.file}`, alt: '' }));
+const riseK = [1.1, 2.0, 0.9, 1.3, 0.75];     // vitesse de chaque colonne
+const riseLag = ['0rem', '9rem', '4rem', '13rem', '6rem'];
+const riseCols = riseK.map((k, ci) => {
+  const n = posters.length;
+  const rot = n ? posters.map((_, i) => posters[(i + ci) % n]) : [];
+  const mine = ci % 2 ? rot.slice().reverse() : rot;
+  const items = [];
+  while (items.length < 14 && mine.length) items.push(...mine);
+  return { items: items.slice(0, 14), k, lag: riseLag[ci], i: ci };
+});
+---
+<div class="gs" data-gs>
+  <!-- ============================ ACCUEIL ============================ -->
+  <header id="accueil" class="gs-hero">
+    <!-- CADRE — Garde les proportions de la maquette (1280 × 832) et tient
+         toujours entier dans l'écran ; tout est placé en % de ce cadre. -->
+    <div class="gs-hero__frame" data-hero-frame>
+    <!-- Positions relevées au pixel sur la maquette « MacBook Air 1 » (1280 × 832),
+         en % de l'accueil. data-box = boîte de l'encre du texte : x0,y0,x1,y1 (%). -->
+    <img data-drag class="gs-sticker gs-sticker--shirt" src="/assets/images/hero-shirt.png" alt="" aria-hidden="true" data-float />
+    <div data-drag class="gs-sticker gs-sticker--ticket" aria-hidden="true" data-float>
+      <img class="gs-ticket__img" src="/assets/images/hero-ticket.png" alt="" />
+      <span class="gs-ticket__paper" aria-hidden="true"></span>
+    </div>
+    <img data-drag class="gs-sticker gs-sticker--star" src="/assets/images/hero-star.png" alt="" aria-hidden="true" data-float />
+    <img data-drag class="gs-sticker gs-sticker--camera" src="/assets/images/hero-camera.png" alt="" aria-hidden="true" data-float />
+
+    <h1 class="gs-hero__name" aria-label="Konstance Kruger, portfolio">
+      <span class="gs-hero__first" data-box="19.17,33.49,81.10,48.34" data-box-m="6,33,94,40">Konstance</span>
+      <span class="gs-hero__last" data-box="12.13,45.13,70.14,68.79" data-box-m="4,40.5,82,51">kruger</span>
+      <span class="gs-hero__tag" data-drag>portfolio</span>
+    </h1>
+    <p class="gs-hero__role">Chef de projet<br />Creative producer</p>
+    <p class="gs-hero__passion" data-box="59.06,84.43,93.87,89.84" data-box-m="20,86,94,90" aria-hidden="true">Passion</p>
+    </div>
+  </header>
+
+  <!-- ===================== NAVIGATION COLLÉE EN HAUT ===================== -->
+  <nav class="gs-nav" aria-label="Navigation principale">
+    <a class="gs-nav__logo" href="#accueil">
+      <span>Konstance</span> <b>kruger</b>
+    </a>
+    <ul>
+      <li><a href="#accueil">accueil</a></li>
+      <li class="gs-nav__item">
+        <a href="#caps" aria-haspopup="true">caps</a>
+        <ul class="gs-nav__sub" aria-label="CAPS">
+          <li><a href="#nuits-du-sport">Nuits du sport</a></li>
+          <li><a href="#podcast">Podcast</a></li>
+          <li><a href="#esport">Tournoi e-sport</a></li>
+        </ul>
+      </li>
+      <li class="gs-nav__item">
+        <a href="#campus" aria-haspopup="true">vie au campus</a>
+        <ul class="gs-nav__sub" aria-label="Vie au campus">
+          <li><a href="#spac">SPAC</a></li>
+          <li><a href="#jpo">JPO</a></li>
+          <li><a href="#inoui">Festival Inoui</a></li>
+        </ul>
+      </li>
+      <li><a href="#a-propos">à propos</a></li>
+      <li><a href="#contact">contact</a></li>
+    </ul>
+  </nav>
+
+  <div class="gs-main">
+    <!-- ============================== CAPS ============================== -->
+    <section id="caps" class="gs-section" aria-labelledby="caps-title">
+      <!-- EN-TÊTE — Vidéo de présentation (muette, en boucle), titre par-dessus. -->
+      <!-- COUVERTURE — Vidéo plein écran, « CAPS » rose poudré, texte blanc à droite. -->
+      <div class="gs-cover-pin">
+        <div class="gs-cover gs-cover--caps">
+        <Media bare file="caps/caps-presentation.webp" video="caps-presentation.mp4" sound={false} alt="Vidéo de présentation de CAPS" label="CAPS" />
+        <h2 id="caps-title" class="gs-cover__title">CAPS</h2>
+        <p class="gs-cover__text" data-type>
+          Est une association étudiante fondée en janvier 2026 pour créer des <strong>contenus audiovisuels et événementiels.</strong>
+        </p>
+      </div>
+      </div>
+
+      <div class="gs-flow">
+        <!-- COULISSES — Photos en arrière-plan qui défilent lentement, bulles de texte
+             qui passent devant plus vite : effet de profondeur (data-speed). -->
+        <div class="gs-story">
+          <p class="gs-bubble gs-story__b1" data-type data-speed="1.14">
+            Avec CAPS, chaque live commence bien avant l’antenne : on installe les caméras,
+            on tire les câbles et on monte une <strong>régie complète.</strong>
+          </p>
+          {exists('objects/caps-can.png') && (
+            <img data-drag class="gs-story__can" src="/assets/images/objects/caps-can.png" alt="" aria-hidden="true" />
+          )}
+          <figure class="gs-photo gs-story__p1" data-wipe data-speed="0.82">
+            <Media bare file="caps/nuit-du-sport-coulisses.webp" alt="La régie installée pour une Nuit du sport" label="Régie" />
+            <figcaption class="gs-label">En régie</figcaption>
+          </figure>
+          <p class="gs-bubble gs-story__b2" data-type data-speed="1.14">
+            Nos directs passent sur Twitch, et les rediffusions sont publiées sur YouTube.
+          </p>
+          <figure class="gs-photo gs-story__p2" data-wipe data-speed="0.78">
+            <Media bare file="caps/podcast-coulisses.webp" alt="Le plateau d'un podcast CAPS avec ses caméras" label="Plateau" />
+            <figcaption class="gs-label">Sur le plateau</figcaption>
+          </figure>
+          <p class="gs-bubble gs-story__b3" data-type data-speed="1.14">
+            Dans l’équipe, je passe d’un rôle à l’autre : <strong>présentation, réalisation,
+            caméras, son et communication.</strong>
+          </p>
+        </div>
+
+        <!-- GRAND TITRE — Annonce nos événements (Nuits du sport, podcast, tournois). -->
+        <h2 class="gs-events-title" data-drop>Nos <span>événements</span></h2>
+        <!-- NUITS DU SPORT — Tout tient sur un écran : titre, photo du futsal,
+             texte, et la photo du volley en pleine hauteur à droite. -->
+        <div id="nuits-du-sport" class="gs-screen gs-screen--sport" data-drop>
+          <h3 class="gs-block-title gs-screen__title">Nuits du sport</h3>
+          <figure class="gs-photo gs-screen__a" data-wipe>
+            <Media bare file="caps/caps-equipe.webp" alt="L'équipe CAPS réunie lors de la Nuit du futsal" label="Nuit du futsal" />
+            <figcaption class="gs-label">La nuit du futsal</figcaption>
+          </figure>
+          <p class="gs-bubble gs-screen__text" data-type>
+            Les « Nuits du sport » : un live Twitch du tournoi, commenté comme si les joueurs étaient de vrais professionnels. <strong>Futsal et volley, en direct de 18 h à 00 h.</strong>
+          </p>
+          <figure class="gs-photo gs-screen__b" data-wipe>
+            <Media bare file="caps/nuit-du-sport-cover.webp" alt="Un joueur smashe au filet pendant la Nuit du volley" label="Nuit du volley" />
+            <figcaption class="gs-label">La nuit du volley</figcaption>
+          </figure>
+          <!-- DESSIN — Mon ballon enflammé (déplaçable). -->
+          {exists('caps/dessin-ballon.png') && (
+            <img data-drag class="gs-ball" src="/assets/images/caps/dessin-ballon.png" alt="" aria-hidden="true" />
+          )}
+        </div>
+        <section class="gs-nds" aria-label="Les Nuits du sport : comment ça s'est passé">
+          <p class="gs-bubble gs-nds__p1" data-type>
+            La MéMO de notre IUT nous a contactés pour <strong>animer son tournoi</strong> de futsal et de volley.
+          </p>
+          <p class="gs-bubble gs-nds__p2" data-type>
+            On a réfléchi à la disposition des caméras et de la régie en fonction du gymnase, puis on s’est installés <strong>4 h avant</strong> le début du live.
+          </p>
+          <p class="gs-bubble gs-nds__p3" data-type>
+            Pendant le tournoi, on a tourné, présenté et réalisé en direct, <strong>de 18 h à minuit.</strong>
+          </p>
+          <!-- ENCADRÉ — Encadré « Mon rôle », en liste. -->
+          <aside class="gs-nds__box" data-drop>
+            <p class="gs-nds__kicker">29.01.26 · 31.03.26</p>
+            <h4 class="gs-nds__box-title">Mon rôle</h4>
+            <ul>
+              <li>Réalisatrice</li>
+              <li>Organisation</li>
+              <li>Présentatrice</li>
+              <li>Chargée de communication</li>
+              <li>Installation et rangement</li>
+            </ul>
+          </aside>
+        </section>
+
+        <!-- PODCAST — Photo à gauche,
+             « PODCAST » géant à cheval sur la photo (lime) et sur la grille (gris foncé),
+             micro qui tombe du haut à droite, sous-titre et texte en dessous. -->
+        <div class="gs-pod" data-drop>
+          <figure class="gs-pod__photo" data-wipe>
+            <Media bare file="caps/podcast-cover.webp" alt="L'équipe CAPS pendant l'enregistrement d'un podcast" label="Podcast" />
+            {exists('caps/dessin-podcast.png') && (
+              <img class="gs-pod__hands" src="/assets/images/caps/dessin-podcast.png" alt="" aria-hidden="true" />
+            )}
+            <figcaption class="gs-label gs-pod__label">Cap’zzz night</figcaption>
+          </figure>
+
+          <!-- TITRE — Grand, lime sur bande gris foncé ; le micro pend sous la fin du mot. -->
+          <div id="podcast" class="gs-pod__head">
+            <h3 class="gs-pod__title">Podcast</h3>
+            {exists('caps/podcast-micro.png') && (
+              <img class="gs-pod__mic" src="/assets/images/caps/podcast-micro.png" alt="" aria-hidden="true" />
+            )}
+          </div>
+
+          <div class="gs-pod__copy">
+            <p class="gs-pod__subtitle">CAPS : c’est avant tout un plaisir de tourner</p>
+            <p class="gs-bubble gs-pod__text" data-type>
+              Nous souhaitions faire des lives plus détendus, qui permettent de s’exprimer en public et qui ont une organisation plus simple, <strong>pour davantage profiter.</strong>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== TRANSITION — Liquide rose clair (CAPS → Vie au campus) ======
+         Le défilement s'arrête ici : un liquide (canvas, physique de vagues) monte sur l'écran
+         des tournois e-sport, bouge avec les secousses du scroll, puis disparaît sur le côté
+         en révélant « Vie au campus ». Tout est piloté par grid-site.js (liquidInit). -->
+    <div id="esport" class="gs-liq-pin" data-liquid>
+      <div class="gs-liq-stage">
+        <div class="gs-flow gs-liq-esport">
+        <!-- TOURNOIS E-SPORT — Même composition « un écran » que les Nuits du sport :
+             titre, Mario Kart à gauche, Valorant en pleine hauteur à droite,
+             bulle de texte au centre, à cheval sur les deux photos. -->
+        <div class="gs-screen gs-screen--sport gs-screen--esport">
+          <h3 class="gs-block-title gs-screen__title">Tournois e-sport</h3>
+          <figure class="gs-photo gs-screen__a" data-wipe>
+            <Media bare file="caps/esport-cover.webp" alt="La régie pendant le tournoi Mario Kart" label="Tournoi Mario Kart" />
+            <figcaption class="gs-label">Tournoi Mario Kart</figcaption>
+          </figure>
+          <p class="gs-bubble gs-screen__text" data-type>
+            On organise des événements qu’on nous réclame : <strong>rassembler et divertir</strong> via le matériel e-sport à disposition dans notre département en MMI.
+          </p>
+          <figure class="gs-photo gs-screen__b" data-wipe>
+            <Media bare file="caps/esport-regie.webp" alt="Les joueurs pendant le tournoi Valorant, filmés par une caméra" label="Tournoi Valorant" />
+            <figcaption class="gs-label">Tournoi Valorant</figcaption>
+          </figure>
+        </div>
+        </div>
+      <div class="gs-cover gs-cover--campus">
+        <Media bare file="campus/vie-au-campus.webp" alt="Konstance éclate un ballon sur la tête d'une amie pendant un événement du campus" label="Vie au campus" />
+        <h2 id="campus-title" class="gs-cover__title">Vie au<br />campus</h2>
+        <p class="gs-cover__text" data-type>
+          Mon objectif est d’aider ma filière à se rassembler mais aussi le campus. Dynamiser
+          notre IUT me paraît primordial pour que nous puissions <strong>partager de belles années.</strong>
+        </p>
+      </div>
+        <canvas class="gs-liq-canvas" aria-hidden="true"></canvas>
+      </div>
+      <span id="campus" class="gs-liq-anchor" aria-hidden="true"></span>
+    </div>
+
+    <!-- =========================== VIE AU CAMPUS =========================== -->
+    <section class="gs-section" aria-labelledby="campus-title">
+
+      <div class="gs-flow">
+
+        <!-- SPAC -->
+        <h3 id="spac" class="gs-block-title gs-block-title--hug"><span>SPAC</span></h3>
+        <div class="gs-spac">
+          <figure class="gs-photo gs-photo--left gs-photo--tall" data-wipe data-speed="0.86">
+            <Media bare file="spac/spac-photo.webp" alt="Deux membres de SPAC posent avec une pancarte en carton SPAC au festival de rentrée" label="SPAC" />
+            <figcaption class="gs-label">Festival de rentrée</figcaption>
+          </figure>
+          <div class="gs-spac__copy" data-speed="1.12">
+            <p class="gs-pod__subtitle">Les capseurs décident de reprendre le BDE MMI</p>
+            <p class="gs-bubble gs-pod__text" data-type>
+              SPAC est le BDE dans lequel je suis vice-présidente. Nous cherchons à réellement
+              dynamiser notre filière, voire notre campus, et pas seulement avec des soirées mais
+              des événements qui peuvent <strong>tous nous rassembler.</strong>
+            </p>
+          </div>
+          {exists('spac/mascotte-corps.png') && (
+            <div class="gs-mascot gs-mascot--bg" data-speed="0.8" data-mascot role="img" aria-label="La mascotte de SPAC qui fait coucou">
+              <div class="gs-mascot__in">
+                <img src="/assets/images/spac/mascotte-corps.png" alt="" />
+                <img class="gs-mascot__eyes" src="/assets/images/spac/mascotte-yeux.png" alt="" />
+              </div>
+            </div>
+          )}
+        </div>
+
+        <!-- JOURNÉE PORTES OUVERTES -->
+        <h3 id="jpo" class="gs-block-title gs-block-title--hug"><span>Journée portes ouvertes</span></h3>
+        <div class="gs-jpo-pin">
+        <div class="gs-jpo">
+          <div class="gs-jpo__panel">
+            <span class="gs-jpo__mark" aria-hidden="true">“</span>
+            <blockquote class="gs-jpo__quote" data-type>
+              Je cherche à me créer de <mark class="gs-jpo__hl">l’expérience</mark> tout en <mark class="gs-jpo__hl">m’épanouissant</mark> dans le monde professionnel.”
+            </blockquote>
+          </div>
+          <figure class="gs-photo gs-jpo__photo" data-wipe>
+            <Media bare file="webtv/jpo.webp" alt="Konstance sur le plateau de la WebTV pendant la journée portes ouvertes" label="Journée portes ouvertes" />
+            <figcaption class="gs-label gs-jpo__tag"><span>Journée portes ouvertes</span><small>26 janv 2026</small></figcaption>
+          </figure>
+        </div>
+        </div>
+        <section class="gs-nds gs-nds--jpo" aria-label="La journée portes ouvertes : comment ça s'est passé">
+          <p class="gs-bubble gs-nds__p1" data-type>
+            Pour la journée portes ouvertes, j’ai aidé au <strong>stand de la WebTV</strong>.
+          </p>
+          <p class="gs-bubble gs-nds__p2" data-type>
+            Avant chaque interview, on préparait en <strong>15 à 20 minutes</strong> des questions pour l’invité : intervenants des filières de l’IUT, des masters…
+          </p>
+          <p class="gs-bubble gs-nds__p3" data-type>
+            Puis j’ai présenté et interviewé <strong>en direct</strong>, sur la chaîne YouTube de l’école.
+          </p>
+          <aside class="gs-nds__box" data-drop>
+            <p class="gs-nds__kicker">26.01.26 · En direct</p>
+            <h4 class="gs-nds__box-title">Mon rôle</h4>
+            <ul>
+              <li>Présentatrice</li>
+              <li>Intervieweuse</li>
+              <li>Préparation des questions</li>
+            </ul>
+            <a class="gs-nds__link" href="https://www.youtube.com/live/5t53BVs1ojQ" target="_blank" rel="noopener noreferrer">Voir le live sur YouTube ↗</a>
+          </aside>
+        </section>
+
+        <!-- FESTIVAL INOUI -->
+        <h3 id="inoui" class="gs-block-title gs-block-title--hug"><span>Festival Inoui</span></h3>
+        <div class="gs-inoui">
+          <figure class="gs-photo gs-inoui__a" data-wipe data-speed="0.86">
+            <Media bare file="inoui/conference.webp" alt="Le tournage d'une conférence du Festival Inouï dans un amphithéâtre" label="Conférence" />
+            <figcaption class="gs-label">Conférence</figcaption>
+          </figure>
+          <p class="gs-bubble gs-inoui__text" data-type data-speed="1.12">
+            Un événement dédié à <strong>l’innovation &amp; aux technologies</strong> où j’ai participé
+            en filmant des conférences et en tant qu’animatrice pour la WebTV.
+          </p>
+          <figure class="gs-photo gs-inoui__b" data-wipe data-speed="0.86">
+            <Media bare file="inoui/radio-campus.webp" alt="Le studio de Radio Campus pendant le Festival Inouï" label="Radio Campus" />
+            <figcaption class="gs-label">Radio Campus · 30 mai 2026</figcaption>
+          </figure>
+        </div>
+        <section class="gs-nds gs-nds--inoui" aria-label="Le Festival Inouï : comment ça s'est passé">
+          <p class="gs-bubble gs-nds__p1" data-type>
+            Le Festival Inouï s’est tenu dans mon école, <strong>l’IUT Nord Franche-Comté</strong> à Montbéliard.
+          </p>
+          <p class="gs-bubble gs-nds__p2" data-type>
+            Sur le stand de la WebTV, on filmait les personnes qui le souhaitaient pour leur faire <strong>leur propre émission</strong>.
+          </p>
+          <p class="gs-bubble gs-nds__p3" data-type>
+            J’ai aussi <strong>filmé des conférences</strong> du festival.
+          </p>
+          <aside class="gs-nds__box" data-drop>
+            <p class="gs-nds__kicker">Montbéliard · Plateau TV</p>
+            <h4 class="gs-nds__box-title">Mon rôle</h4>
+            <ul>
+              <li>Présentatrice</li>
+              <li>Réalisatrice</li>
+              <li>Ingénieure du son</li>
+            </ul>
+            <p class="gs-nds__stat"><strong>10+</strong><span>personnes filmées pour leur propre émission</span></p>
+          </aside>
+        </section>
+      </div>
+    </section>
+
+    <!-- TRANSITION — un rectangle blanc monte, rempli de colonnes d'affiches qui montent à des vitesses différentes. -->
+    {posters.length > 0 && (
+      <div class="gs-rise" data-rise aria-hidden="true">
+        <div class="gs-rise__stage">
+          <div class="gs-rise__panel">
+            {riseCols.map((col) => (
+              <div class="gs-rise__col" style={`--k:${col.k}; --lag:${col.lag}; --r:0`} data-col={col.i}>
+                <div class="gs-rise__track">
+                  {col.items.map((po) => <img src={po.src} alt="" loading="lazy" />)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )}
+
+    <!-- À PROPOS → CONTACT — l'écran reste collé : le texte de présentation, les compétences et les logiciels
+         glissent l'un après l'autre, puis la page « Contact » arrive depuis la droite (piloté par grid-site.js). -->
+    <div class="gs-turn" data-turn>
+      <span id="a-propos" class="gs-turn__top" aria-hidden="true"></span>
+      <div class="gs-turn__stage">
+        <section class="gs-contact" aria-labelledby="contact-title">
+          <p class="gs-legal"><a href="/mentions-legales/">Mentions légales</a></p>
+          <div class="gs-contact__side">
+            <h2 id="contact-title" class="gs-contact__title">Me <strong>retrouver</strong></h2>
+            <ul class="gs-contact__social">
+              {profile.instagram && <li><a href={profile.instagram} target="_blank" rel="noopener noreferrer"><b>Instagram</b><span>@konstance.kruger</span><i aria-hidden="true">↗</i></a></li>}
+              {profile.linkedin && <li><a href={profile.linkedin} target="_blank" rel="noopener noreferrer"><b>LinkedIn</b><span>Konstance Kruger</span><i aria-hidden="true">↗</i></a></li>}
+              {profile.email && <li><a href={`mailto:${profile.email}`}><b>E-mail</b><span>{profile.email}</span><i aria-hidden="true">↗</i></a></li>}
+            </ul>
+          </div>
+          <div class="gs-contact__right">
+            <form class="gs-form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+              <input type="hidden" name="form-name" value="contact" />
+              <p hidden><label>Ne pas remplir : <input name="bot-field" /></label></p>
+              <label class="gs-form__field"><span>Nom</span><input type="text" name="nom" autocomplete="name" required /></label>
+              <label class="gs-form__field"><span>E-mail</span><input type="email" name="email" autocomplete="email" required /></label>
+              <label class="gs-form__field"><span>Message</span><textarea name="message" rows="3" required></textarea></label>
+              <button class="gs-form__send" type="submit">Envoyer <i aria-hidden="true">↗</i></button>
+            </form>
+            <a class="gs-contact__cv" href="/assets/documents/cv-konstance-kruger.pdf" download><span>(Mon CV)</span><b>Télécharger en PDF</b><i aria-hidden="true">↓</i></a>
+          </div>
+        </section>
+        <div class="gs-turn__page">
+          <section class="gs-about" aria-labelledby="about-title">
+            <h2 id="about-title" class="gs-about__tag">(À propos)</h2>
+            <div class="gs-about__s1">
+              <p class="gs-big gs-big--c gs-big--xl">
+                Je suis <strong>Konstance Kruger</strong>, <strong>19 ans</strong>, en 2<sup>e</sup> année de <strong>BUT MMI</strong> à Montbéliard.
+                Je veux devenir <strong>cheffe de projet</strong> dans l’<strong>événementiel</strong> ou l’<strong>audiovisuel</strong>.
+              </p>
+            </div>
+            <div class="gs-about__s2">
+              <div class="gs-s2__skills">
+                <h3 class="gs-s2__title">Ce que je <strong>sais faire</strong></h3>
+                <ul class="gs-stack" aria-label="Compétences">
+                  {skills.map((s, i) => (
+                    <li class="gs-stack__item" style={`--i:${i}`}>
+                      <b>{s.label}{s.sub && <small> {s.sub}</small>}</b>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <div class="gs-about__s3">
+              <div class="gs-s2__tools">
+                <h3 class="gs-s2__title">Mes <strong>logiciels</strong></h3>
+                <ul class="gs-tools" aria-label="Logiciels">
+                  {tools.map((t, i) => <li style={`--i:${i}`}>{t.name}</li>)}
+                </ul>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+      <span id="contact" class="gs-turn__end" aria-hidden="true"></span>
+    </div>
+
+  </div>
+
+  <!-- Effets : grille lumineuse sous le curseur + point lumineux rose (cachés au toucher). -->
+  <div class="gs-glow" aria-hidden="true"></div>
+  <div class="gs-cursor" aria-hidden="true"><span class="gs-cursor__txt">attrape-moi</span></div>
+</div>

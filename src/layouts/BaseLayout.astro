@@ -9,11 +9,18 @@ import Footer from '../components/Footer.astro';
 const {
   title,
   wide = false,
-  description = 'Portfolio de Konstance Kruger, étudiante en BUT MMI : production audiovisuelle et événementielle avec CAPS, vie étudiante avec SPAC, WebTV et créations.'
+  description = 'Portfolio de Konstance Kruger, étudiante en BUT MMI à Montbéliard : projets audiovisuels et événementiels avec CAPS, vie étudiante avec SPAC, affiches et créations.'
 } = Astro.props;
 
 // RÉFÉRENCEMENT — Adresse canonique et image de partage : seulement quand le nom
 // de domaine est renseigné dans astro.config.mjs (site: 'https://…').
+// Les trois feuilles de polices (General Sans droit, General Sans italique, Melodrama).
+const fontLinks = [
+  'https://api.fontshare.com/v2/css?f[]=general-sans@300,400,500,600,700&display=swap',
+  'https://api.fontshare.com/v2/css?f[]=general-sans@301,401,501,601,701&display=swap',
+  'https://api.fontshare.com/v2/css?f[]=melodrama@400,500,700&display=swap'
+];
+
 const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
 ---
 
@@ -39,31 +46,25 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : un
     {canonical && <meta property="og:url" content={canonical} />}
     <meta name="twitter:card" content="summary" />
 
-    <!-- TYPOGRAPHIES — Uniquement General Sans et Melodrama (Fontshare).
-         Trois liens séparés : si l'un échoue, les deux autres polices restent chargées. -->
+    <!-- TYPOGRAPHIES — Uniquement General Sans et Melodrama (Fontshare, licence ITF Free Font License).
+         Les feuilles de style ne bloquent plus l'affichage : elles sont chargées « en
+         impression » (media="print"), puis activées dès qu'elles sont arrivées (onload).
+         Le texte s'affiche tout de suite avec une police de secours, puis change sans saut grave.
+         Trois liens séparés : si l'un échoue, les deux autres polices restent chargées.
+         <noscript> reprend les mêmes liens pour les navigateurs sans JavaScript. -->
     <link rel="preconnect" href="https://api.fontshare.com" />
     <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
-    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=general-sans@300,400,500,600,700&display=swap" />
-    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=general-sans@301&display=swap" />
-    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=melodrama@400,500,700&display=swap" />
-
-    <!-- ANIMATIONS — On active le mode animé avant l'affichage (pas de clignotement).
-         Sécurité : si le script du magazine ne démarre pas en 3 s, tout redevient visible. -->
-    <script is:inline>
-      if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
-        document.documentElement.classList.add('js-anim');
-        setTimeout(function () {
-          if (!window.__magReady) document.documentElement.classList.remove('js-anim');
-        }, 3000);
-      }
-    </script>
+    {fontLinks.map((href) => <link rel="stylesheet" href={href} media="print" onload="this.media='all'" />)}
+    <noscript>
+      {fontLinks.map((href) => <link rel="stylesheet" href={href} />)}
+    </noscript>
   </head>
 
   <body>
     <!-- Accès clavier au contenu -->
     <a class="skip-link" href="#contenu">Aller au contenu</a>
 
-    <!-- En-tête commun (masqué sur le magazine) -->
+    <!-- En-tête commun (masqué sur la longue page, visible sur les mentions légales) -->
     <Header />
 
     <!-- Contenu de la page -->
@@ -71,7 +72,7 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : un
       <slot />
     </main>
 
-    <!-- Pied de page (masqué sur le magazine) -->
+    <!-- Pied de page (masqué sur la longue page, visible sur les mentions légales) -->
     <Footer />
 
     <!-- Navigation mobile -->

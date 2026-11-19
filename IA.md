@@ -21,28 +21,24 @@ Création des composants Hero, Presentation, Projects, Contact et Media. Parcour
 ## Hero et blanc pur
 Recomposition du Hero depuis la maquette : prénom fin, nom gras incliné, ovale lime, accent PASSION rose. Fonds beiges remplacés par #FFFFFF. Familles chargées via Fontshare ; Melodrama inclinée par le navigateur. Objets originaux encore à fournir (hero-tshirt.webp, hero-ticket.webp, hero-etoile.webp, hero-television.webp).
 
-## Claude (Anthropic) — novembre 2026, jusqu’au 16 novembre
+## Claude (Anthropic) — novembre 2026
 
-Outil : Claude, assistant conversationnel d’Anthropic, utilisé dans l’application Claude. À partir du 16 novembre, Claude a aussi écrit directement les fichiers dans le dossier du projet, avec mon autorisation d’accès à ce seul dossier.
+Outil : Claude, assistant d’Anthropic. Il a écrit directement les fichiers dans le dossier du projet, avec mon autorisation d’accès à ce seul dossier. Je teste dans Safari et je commit / pousse moi-même sur GitHub.
 
 ### Étapes et usages
-- Intégration de mes maquettes Figma (doubles pages « MacBook Air ») en Astro, CSS et JavaScript.
-- Navigation « magazine » : caméra qui se déplace entre les doubles pages, molette, clavier, tactile, sommaire.
-- Animations d’arrivée (lettres, photos, traits), inspirées de références Awwwards que j’ai fournies (vivmgmt).
-- Contrôle du site par rapport au cahier des charges et corrections techniques (voir plus bas).
+- 6–16 novembre : intégration de mes maquettes en magazine, contrôle du cahier des charges, mise en ligne (voir JOURNAL.md).
+- 17–19 novembre : nouvelle direction artistique « grille » : transitions au défilement, À propos, Contact, menu, billet du hero ; audit de l’énoncé ; correction de l’accessibilité, des mentions légales, nettoyage et commentaires du code.
 
 ### Ce que Claude a produit
-- `src/components/EditorialJourney.astro` (structure des doubles pages), `src/styles/editorial-journey.css` (mise en page et animations), `src/scripts/editorial-journey.js` (navigation et animations).
-- Correctif de `src/components/Media.astro` : les images ne s’affichaient pas (mauvais chemin) ; option pour une vidéo sans bouton de son.
-- 16 novembre : page des mentions légales, redirection des anciennes pages, favicon, `robots.txt`, balises de partage, compression des images, retrait de Tailwind et DaisyUI (non utilisés), premier jet de ce paragraphe, de l’entrée du journal et de la grille qualité.
+- `src/components/GridSite.astro`, `src/styles/grid-site.css`, `src/scripts/grid-site.js` (toute la longue page), `Media.astro`, `BaseLayout.astro`, mentions légales, documents du dépôt.
+- Les photos, vidéos, dessins, affiches, mascotte, textes de présentation et choix de design viennent de moi et de mon équipe.
 
 ### Ce que j’ai rejeté, corrigé ou imposé
-- J’ai rejeté la première proposition de Claude (une page en défilement unique, sans mes maquettes) : j’ai demandé que le site reproduise fidèlement mes maquettes.
-- J’ai interdit le rose corail proposé et limité les polices à Melodrama et General Sans.
-- J’ai fait retirer les objets décoratifs (manette, micro, canette…) et le ballon choisi par Claude, remplacés par mes propres dessins (ballon enflammé, mains qui filment).
-- J’ai choisi l’ordre des chapitres et des pages, supprimé des pages (« Mon univers », « Imaginer », « Créer ») et ajouté les pages Vie au campus, SPAC, Festival Inouï, Journée portes ouvertes, Podcast et Tournois e-sport d’après mes maquettes.
-- J’ai fait corriger : la mauvaise photo SPAC, la mascotte qui touchait le texte, le titre e-sport trop petit, la lettre « S » coupée, l’ajout de légendes, le fondu noir sous les textes, la vidéo CAPS sans son.
-- Textes : ceux des pages viennent de mes maquettes ; Claude a corrigé l’orthographe (« événements », « détendus », « voire »). La citation de la page « À propos » a été proposée par Claude : à remplacer ou valider avec mes propres mots.
+- J’ai rejeté la première proposition (page sans mes maquettes), le rose corail, les objets décoratifs, puis, pour la page À propos : les cercles de langues, les éléments qui tombent, la carte avec stickers (« c’est moche »), le cadre autour du texte, le texte trop long (réduit à : 19 ans, cheffe de projet, BUT 2), les compétences présentées comme un sommaire.
+- J’ai imposé : compétences et logiciels en simple texte (Melodrama / General Sans en alternance), à droite pour les compétences et à gauche pour les logiciels, apparition une par une, aucune transition en transparence ; Contact qui arrive depuis la droite ; formulaire blanc encadré aux couleurs du site ; menu et sous-menus de mon choix ; billet du hero sans texte.
+- J’ai ralenti l’arrivée des colonnes d’affiches (seulement à l’entrée, pas pendant le défilement).
+- Textes : ils viennent de moi (qualités, parcours, objectif). Claude les a seulement mis en forme.
+- Police « PASSION » : Dirty Stains DEMO retirée (licence), remplacée par Rubik Spray Paint (OFL), que j’ai validée.
 
 ### Compréhension et maîtrise
-À travailler avant la soutenance, pour pouvoir expliquer chaque partie : déplacement de la caméra (`transform: translate3d`), détection d’un geste de molette, `IntersectionObserver` sur mobile, ajustement des titres à la largeur (`fitTitles`), animations CSS déclenchées par la classe `.is-shown`.
+À savoir expliquer : voir la liste « Notions à savoir expliquer » dans `docs/SOUTENANCE.md` (variables CSS pilotées par le défilement, `position: sticky`, `IntersectionObserver`, texte lettre par lettre, `prefers-reduced-motion`, Netlify Forms).

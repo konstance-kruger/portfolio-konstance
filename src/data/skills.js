@@ -1,26 +1,20 @@
-// COMPÉTENCES — Affichées sur la page À propos, en grandes étiquettes.
-// Tirées de ce que Konstance a fait sur ses projets (CAPS, SPAC, WebTV).
-// highlight: true = étiquette pleine en lime (les autres sont en contour).
+// COMPÉTENCES — Affichées sur la page À propos, l'une sous l'autre (Melodrama / General Sans en alternance).
 
 export const skills = [
-  { label: 'Réalisation', highlight: true },
-  { label: 'Caméra' },
-  { label: 'Son' },
-  { label: 'Présentation', highlight: true },
-  { label: 'Interview' },
-  { label: 'Événementiel', highlight: true },
+  { label: 'Design graphique' },
+  { label: 'Design d’expérience', sub: 'UX / UI' },
+  { label: 'Développement web' },
+  { label: 'Gestion de projet' },
   { label: 'Communication' },
   { label: 'Régie' },
+  { label: 'Photographie' },
 ];
 
 // LOGICIELS — Ceux que Konstance maîtrise.
-// Logos : déposer le logo officiel de chaque application dans
-// public/assets/icons/logiciels/ avec le nom indiqué (SVG ou PNG transparent).
-// Tant qu'un logo manque, c'est le nom de l'application qui s'affiche à sa place.
+// Le nom de chaque logiciel s'affiche en grand sur la page À propos.
 export const tools = [
-  { name: 'Figma', logo: 'figma' },
-  { name: 'VS Code', logo: 'vscode' },
-  { name: 'CapCut', logo: 'capcut' },
-  { name: 'DaVinci Resolve', logo: 'davinci-resolve' },
-  { name: 'Affinity', logo: 'affinity' },
+  { name: 'Figma' },
+  { name: 'Affinity' },
+  { name: 'CapCut' },
+  { name: 'VS Code' },
 ];

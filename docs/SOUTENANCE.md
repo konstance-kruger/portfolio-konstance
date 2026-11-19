@@ -1,17 +1,23 @@
 # Préparation et livrables
 
-Échéance de livraison : 16 novembre 2026. Soutenance finale : 17 novembre, 8 minutes selon la consigne fournie.
+Liens rendus le 16 novembre 2026. Le site continue d’évoluer ensuite (modifications autorisées). Les projets présentés ont été validés par l’enseignant.
 
-- [ ] Note de positionnement relue, une page maximum.
-- [ ] Moodboard et deux pistes écartées avec raisons réelles.
-- [ ] Prototype Figma navigable desktop et mobile.
-- [ ] Choix des technologies et bibliothèques justifiés.
-- [ ] Trois études de cas complètes : contexte, rôle, processus, choix techniques, résultat.
-- [ ] À propos à la première personne et contact fonctionnel.
-- [ ] Site sur le nom de domaine et hébergement configuré.
-- [ ] Dépôt GitHub public avec commits réels au fil du travail.
-- [ ] JOURNAL.md, IA.md et QUALITE.md renseignés.
-- [ ] LinkedIn et un autre réseau pertinent mis à jour ; choix justifié dans le journal.
-- [ ] Présentation orale et explication d’une portion de code entraînées.
+- [x] Site sur le nom de domaine, hébergé sur Netlify (HTTPS).
+- [x] Dépôt GitHub public.
+- [x] JOURNAL.md, IA.md et QUALITE.md mis à jour le 19 novembre 2026.
+- [x] Note de positionnement (`docs/POSITIONNEMENT.md`).
+- [x] Mentions légales à jour (formulaire, polices, crédits).
+- [ ] CV au format PDF à déposer : `public/assets/documents/cv-konstance-kruger.pdf`.
+- [ ] Formulaire : activer « Forms » dans Netlify et envoyer un message de test.
+- [ ] Vérifier sur le site en ligne : Lighthouse, Safari, iPhone, lecteur d’écran (VoiceOver).
+- [ ] Présentation orale (8 minutes) et explication d’une portion de code entraînées.
 
-Les éléments de la soutenance maquette restent à vérifier selon ce qui a déjà été remis. L’arborescence seule ne valide pas ces livrables.
+## Notions à savoir expliquer (code)
+
+- **Composant Astro** : partie réutilisable ; `GridSite.astro` contient la page, `Media.astro` affiche une image ou une vidéo. Le code entre `---` s’exécute au build ; le script `grid-site.js` s’exécute dans le navigateur.
+- **Variables CSS pilotées par le défilement** : `grid-site.js` calcule une progression entre 0 et 1 (`getBoundingClientRect`) et l’écrit dans `--turn`, `--sw`… ; le CSS les lit dans `calc()` pour déplacer les blocs (`translate`). Voir `updateTurns()`.
+- **position: sticky** : la scène À propos / Contact reste collée pendant que la zone haute défile.
+- **IntersectionObserver** : prévient quand un élément entre dans l’écran (photos qui se dévoilent, vidéos, mascotte).
+- **Texte lettre par lettre** : chaque lettre devient un `<span>` ; le nombre de lettres allumées dépend du défilement. Le texte complet est aussi dans un `<span class="sr-only">` pour les lecteurs d’écran.
+- **prefers-reduced-motion** : si la personne demande moins d’animations, elles sont coupées.
+- **Netlify Forms** : `data-netlify="true"` sur le `<form>` suffit ; Netlify récupère les messages à la mise en ligne.

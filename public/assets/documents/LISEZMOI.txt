@@ -1,0 +1,5 @@
+Dépose ici ton CV au format PDF avec exactement ce nom :
+
+cv-konstance-kruger.pdf
+
+Il sera téléchargeable depuis le bouton « Télécharger en PDF » de la page Contact.

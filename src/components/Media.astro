@@ -14,12 +14,13 @@
 // - label    : texte affiché dans l'emplacement réservé
 // - portrait : (anciennes pages) cadre vertical 4:5
 // - bare     : true → affiche l'image seule, sans <figure class="media-frame">.
-//              Utilisé par le magazine : c'est le CSS de chaque double page qui
+//              Utilisé par la longue page : c’est le CSS de chaque bloc qui
 //              dimensionne le cadre, sans être perturbé par les règles générales.
 // - video    : vidéo depuis public/assets/videos/ (ex. "nuit-du-sport.mp4").
 //              Si elle existe, elle remplace l'image (qui devient son affiche).
 // - fit      : "cover" (remplit le cadre, par défaut) ou "contain" (image entière)
-// - sound    : false → vidéo d'ambiance, toujours muette, sans bouton « Activer le son »
+// - sound    : false → vidéo d'ambiance, toujours muette, sans bouton « Activer le son »,
+//              lancée automatiquement par le navigateur (attribut autoplay)
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 
@@ -51,7 +52,8 @@ const videoSrc = `/assets/videos/${video}`;
         muted
         loop
         playsinline
-        preload="none"
+        autoplay={!sound}
+        preload={sound ? 'none' : 'auto'}
         aria-label={alt}
         data-video
       ></video>

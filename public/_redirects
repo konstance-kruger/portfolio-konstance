@@ -1,7 +1,7 @@
-# REDIRECTIONS (Netlify) — Anciennes adresses vers la bonne double page du magazine.
-# « 301! » : redirection définitive, appliquée même si l'ancienne page existe encore.
-/caps/        /#caps       301!
-/spac/        /#spac       301!
-/a-propos/    /#apropos    301!
-/contact/     /#contact    301!
-/creations/   /            301!
+# REDIRECTIONS (Netlify) — Les anciennes adresses du site (une page par rubrique)
+# renvoient vers la bonne partie de la page unique. « 301 » : redirection définitive.
+/caps/        /#caps        301
+/spac/        /#spac        301
+/a-propos/    /#a-propos    301
+/contact/     /#contact     301
+/creations/   /             301

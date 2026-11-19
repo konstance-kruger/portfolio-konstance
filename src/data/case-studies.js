@@ -36,6 +36,14 @@ export const caseStudies = [
       ['Installer', '4 h de montage avant le live, 2 h de rangement après.'],
       ['Commenter', 'En duo, à tour de rôle, de 18 h à minuit.'],
     ],
+    // frise : repères de la démarche, dans l'ordre (nouvelle DA) — [repère, mot]
+    frise: [
+      ['Avant', 'caméras, câblage, affiches'],
+      ['4 h', 'de montage'],
+      ['18 h', 'début du live'],
+      ['00 h', 'fin du live'],
+      ['2 h', 'de rangement'],
+    ],
     result: { stat: '35–40', label: 'spectateurs en moyenne, constants sur les deux lives' },
     link: null,
     lesson: [],
@@ -76,6 +84,11 @@ export const caseStudies = [
       ['Préparer', '15 à 20 min avant, des questions pour chaque invité.'],
       ['Interviewer', 'En live : filières de l’IUT, masters…'],
       ['Diffuser', 'Sur la chaîne YouTube de l’école.'],
+    ],
+    frise: [
+      ['15–20 min', 'de questions préparées'],
+      ['En direct', 'les interviews'],
+      ['YouTube', 'chaîne de l’école'],
     ],
     result: null,
     link: { href: 'https://www.youtube.com/live/5t53BVs1ojQ', label: 'Voir le live sur YouTube' },

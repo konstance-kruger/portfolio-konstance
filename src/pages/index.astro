@@ -1,12 +1,15 @@
 ---
+// ACCUEIL — Le portfolio : une seule longue page (DA « grille »).
+// Tout le contenu est dans le composant GridSite ; le comportement (défilement,
+// animations, stickers déplaçables) est dans src/scripts/grid-site.js.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import EditorialJourney from '../components/EditorialJourney.astro';
-import '../styles/editorial-journey.css';
+import GridSite from '../components/GridSite.astro';
+import '../styles/grid-site.css';
 ---
 
 <BaseLayout title="Konstance Kruger — Portfolio 2026" wide>
-  <EditorialJourney />
+  <GridSite />
   <script>
-    import '../scripts/editorial-journey.js';
+    import '../scripts/grid-site.js';
   </script>
 </BaseLayout>

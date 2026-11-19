@@ -1,53 +1,53 @@
 # Vérifications qualité
 
-Grille construite pour ce site : un magazine d’une seule page, très visuel (photos, vidéo, animations), navigué à la molette, au clavier et au doigt, sans formulaire ni cookie. Chaque ligne indique ce qui a été réellement vérifié, comment, et ce qui a été corrigé. « À faire » = pas encore vérifié.
+Site : une seule longue page très visuelle (photos, vidéo, animations au défilement) + mentions légales. Un formulaire de contact (Netlify Forms), aucun cookie. « À faire » = pas encore vérifié.
 
 ## Accessibilité
 
 | Critère | Vérification | Résultat / correction |
 | --- | --- | --- |
-| Langue de la page | Code : `<html lang="fr">` | Conforme |
-| Lien d’évitement | Code : « Aller au contenu » vers `#contenu` | Présent |
-| Navigation au clavier | Code : flèches, Page suivante/précédente, Tab sur le sommaire ; doubles pages hors écran rendues inertes (`inert`) | Implémenté — test réel au clavier dans Safari : à faire |
-| Focus visible | Code : contour 2 px gris foncé sur tous les éléments | Présent |
-| Animations réduites | Code : toutes les animations dépendent de `prefers-reduced-motion: no-preference` ; vidéo non lancée sinon | Conforme ; vérifié en capture avec le réglage « réduire les animations » |
-| Textes alternatifs | Relecture de chaque image : photos décrites, dessins décoratifs en `alt=""` | Conforme |
-| Lisibilité des textes blancs sur photo | Captures des pages Inouï, Radio Campus, Journée portes ouvertes | Fondu noir ajouté sous les textes (16/11) |
-| Contraste du texte gris foncé #323232 sur rose #F0C6DE et lime #C7F000 | Calcul du rapport de contraste (formule WCAG) | 8,4:1 sur rose et 9,7:1 sur lime : conforme (seuil 4,5:1) |
-| Lecteur d’écran | VoiceOver sur Mac | À faire |
+| Mesure automatique | Lighthouse (19/11, en local) | Accueil 96 / 100 avant corrections des contrastes de formulaire ; mentions légales 100. Refaire sur le site en ligne |
+| Langue, lien d’évitement | Code : `lang="fr"`, « Aller au contenu » | Conforme |
+| Structure | Un seul `<main>` (doublon supprimé le 19/11), un `h1`, `h2` par grande partie | Conforme |
+| Texte animé lettre par lettre | Lettres en `aria-hidden`, texte complet dans un `<span class="sr-only">` (l’`aria-label` sur `<p>` est interdit) | Corrigé le 19/11 ; test VoiceOver : à faire |
+| Contrastes | Lighthouse + calcul WCAG | Rose vif #e94bb0 en petit texte (3,4:1) remplacé par #b3217b (6,1:1) ; sur gris foncé, texte lime (9,7:1) ; boutons au survol fond foncé + texte lime |
+| Nom du lien logo | Lighthouse (« label in name ») | Libellé visible repris tel quel |
+| Animations réduites | Code `prefers-reduced-motion` : animations et lecture automatique coupées, page empilée lisible | Conforme |
+| Clavier | Sous-menus ouverts aussi au focus (`:focus-within`) | Test réel au clavier dans Safari : à faire |
+| Alternatives | Photos décrites, dessins décoratifs `alt=""` | Conforme |
 
 ## Sobriété et performance
 
 | Critère | Vérification | Résultat / correction |
 | --- | --- | --- |
-| Poids des photos | Mesure des fichiers de `public/assets/images` | 7,5 Mo → 0,8 Mo : conversion WebP avec perte (qualité 80), 1 800 px maximum (16/11) |
-| Code inutile | Recherche des classes Tailwind/DaisyUI dans le projet | Non utilisées par le magazine : retirées (16/11) |
-| Vidéo | Code : `preload="none"`, lecture seulement sur sa double page, pause ailleurs | Conforme |
-| Chargement des images | Code : `loading="lazy"` sur les photos | Présent |
-| Mesure globale | Lighthouse (Chrome) ou EcoIndex sur le site en ligne | À faire après mise en ligne |
+| Poids du site | Dossier `dist` (19/11) | 8,3 Mo → 4,9 Mo : vidéo 4,3 → 2,3 Mo, fichiers inutilisés et police d’essai supprimés |
+| Polices | Fontshare (3 feuilles) | Chargées sans bloquer l’affichage (`media="print"` + `onload`) ; police du mot « Passion » hébergée (≈ 15 Ko) |
+| Code inutile | Analyse des classes CSS non utilisées | CSS 87 Ko → 65 Ko, anciennes pages et scripts supprimés, JS « cercles » retiré |
+| Images | WebP, `loading="lazy"` | Présent |
+| Mesure globale en ligne | Lighthouse / EcoIndex sur portfolio.kkruger.fr | À faire après publication |
 
 ## Référencement
 
-| Critère | Vérification | Résultat / correction |
-| --- | --- | --- |
-| Titre et description | Code de `BaseLayout.astro` | Description rendue précise (16/11) |
-| Structure des titres | Un seul `h1` (mon nom), `h2` par double page | Conforme |
-| Anciennes pages en double | Liste des pages générées | `/caps/`, `/spac/`, `/a-propos/`, `/contact/`, `/creations/` redirigent vers le magazine : redirection 301 Netlify (`_redirects`) et page de secours Astro (16/11) |
-| robots.txt, plan du site, favicon, partage, adresse canonique | Fichiers et balises, `https://portfolio.kkruger.fr` | Ajoutés (16/11) |
+| Critère | Résultat |
+| --- | --- |
+| Lighthouse SEO | 100 / 100 |
+| Titre, description, balises de partage, canonique, `robots.txt`, `sitemap.xml` | Présents ; plan du site mis à jour le 19/11 |
+| Anciennes adresses | `/caps/`, `/spac/`, `/a-propos/`, `/contact/`, `/creations/` redirigent (301) vers la bonne partie de la page |
 
 ## Conformité juridique
 
-| Critère | Vérification | Résultat / correction |
-| --- | --- | --- |
-| Mentions légales accessibles | Depuis l’accueil | Lien ajouté dans le sommaire (16/11) |
-| Éditrice et hébergeur | Contenu de la page | Hébergeur Netlify, Inc. (adresse de ses conditions contractuelles) ; domaine chez Infomaniak ; mon e-mail affiché (16/11) |
-| Crédits photo | Relecture des photos | « © Ethan HDM » pour la Nuit du volley ; auteur de la mascotte SPAC : à préciser |
-| Droit à l’image | Personnes identifiables sur les photos | Procédure de retrait indiquée ; accords des personnes : à obtenir |
-| Polices | Licence | ITF Free Font License (Fontshare), mentionnée |
-| Données personnelles | Cookies, formulaires, statistiques | Aucun ; transmission technique de l’IP à Netlify (États-Unis) et Fontshare signalée |
+| Critère | Résultat / correction |
+| --- | --- |
+| Mentions légales | Réécrites le 19/11 : éditrice, hébergeur Netlify, domaine Infomaniak |
+| Données personnelles | Formulaire (nom, e-mail, message) : finalité, base légale, destinataire Netlify, durée (12 mois max.), droits, CNIL ; aucun cookie |
+| Polices | General Sans et Melodrama (ITF Free Font License, Fontshare) ; Rubik Spray Paint (SIL OFL 1.1) ; Dirty Stains DEMO retirée |
+| Crédits | « © Ethan HDM » (Nuit du volley) ; mascotte SPAC : créée avec l’équipe SPAC |
+| Droit à l’image | Personnes connues et d’accord ; procédure de retrait indiquée |
+| Lien depuis le site | Lien « Mentions légales » ajouté sur la page Contact |
 
-## Tests d’affichage réalisés
+## Tests d’affichage
 
-- Compilation Astro sans erreur (16/11).
-- Captures de chaque double page à 1280 × 832 et 1260 × 648 (format de mon écran) : pas de chevauchement.
-- Version mobile, Safari et iPhone : à faire.
+- Compilation Astro sans erreur (19/11).
+- Captures comparées avant / après nettoyage du CSS (22 positions de défilement, ordinateur 1440 × 900) : rendu identique.
+- Capture mobile 390 px : À propos, Contact et menu corrigés (accueil masqué dans le menu, À propos avant Contact).
+- Safari, iPhone réel, VoiceOver, envoi réel du formulaire : à faire.
