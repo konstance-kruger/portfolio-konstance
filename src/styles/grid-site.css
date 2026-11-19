@@ -1165,7 +1165,7 @@ html:has(.gs) { scroll-behavior: smooth; scroll-padding-top: 4.5rem; }
 .gs .gs-contact__cv i { font-style: normal; }
 .gs .gs-form__send:hover,
 .gs .gs-contact__cv:hover { transform: translateY(-3px); }
-.gs .gs-form__send { width: 100%; background: var(--lime); color: var(--ink); }
+.gs .gs-form__send { width: 100%; justify-content: center; background: var(--lime); color: var(--ink); }
 /* Au survol : fond foncé + texte lime (contraste lisible ; le rose vif sur blanc ne l'est pas). */
 .gs .gs-form__send:hover,
 .gs .gs-contact__cv:hover { background: var(--ink); color: var(--lime); }
@@ -1289,42 +1289,3 @@ html:has(.gs) { scroll-behavior: smooth; scroll-padding-top: 4.5rem; }
 .gs-legal a { color: inherit; text-underline-offset: 3px; }
 .gs-legal a:hover,
 .gs-legal a:focus-visible { color: var(--ink); text-decoration-thickness: 2px; }
-
-/* =====================================================================
-   ÉCRAN DE CHARGEMENT — quatre stickers qui arrivent l'un sur l'autre.
-   Caché par défaut ; la classe .js-load (posée par le script de GridSite.astro)
-   l'affiche. Chaque sticker entre par un côté (animation gs-load-in) avec un
-   retard croissant (animation-delay) : le suivant recouvre le précédent.
-   À la fin, .is-done fait glisser l'écran vers le haut (pas de fondu).
-   ===================================================================== */
-.gs-loader { display: none; }
-.js-load { overflow: hidden; }
-.js-load .gs-loader {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  display: grid;
-  place-items: center;
-  background:
-    linear-gradient(#d9d9d9 1px, transparent 1px) 0 0 / 48px 48px,
-    linear-gradient(90deg, #d9d9d9 1px, transparent 1px) 0 0 / 48px 48px,
-    var(--white);
-  transition: translate 0.8s cubic-bezier(0.7, 0, 0.2, 1);
-}
-.js-load .gs-loader.is-done { translate: 0 -101%; }
-.gs-loader__s {
-  grid-area: 1 / 1;
-  width: clamp(200px, 32vw, 420px);
-  height: auto;
-  filter: drop-shadow(0 14px 18px rgb(0 0 0 / 0.2));
-  animation: gs-load-in 1.2s cubic-bezier(0.2, 0.8, 0.25, 1) both;
-  animation-delay: calc(var(--n) * 1.05s + 0.3s);
-}
-.gs-loader__s--1 { --n: 0; --fx: -70vw; --tx: -9vw; --ty: -3vh; --rot: -9deg; }
-.gs-loader__s--2 { --n: 1; --fx: 70vw;  --tx: 6vw;  --ty: 4vh;  --rot: 7deg; width: clamp(240px, 40vw, 520px); }
-.gs-loader__s--3 { --n: 2; --fx: -70vw; --tx: -4vw; --ty: 6vh;  --rot: 12deg; width: clamp(170px, 24vw, 320px); }
-.gs-loader__s--4 { --n: 3; --fx: 70vw;  --tx: 8vw;  --ty: -4vh; --rot: -6deg; }
-@keyframes gs-load-in {
-  from { translate: var(--fx) 0; rotate: calc(var(--rot) * -4); }
-  to   { translate: var(--tx) var(--ty); rotate: var(--rot); }
-}

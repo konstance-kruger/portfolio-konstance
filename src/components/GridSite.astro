@@ -37,36 +37,6 @@ const riseCols = riseK.map((k, ci) => {
 });
 ---
 <div class="gs" data-gs>
-  <!-- ÉCRAN DE CHARGEMENT — Les stickers du hero arrivent l'un après l'autre et s'empilent,
-       puis l'écran glisse vers le haut et découvre la page. Purement décoratif (aria-hidden).
-       Le petit script juste dessous l'active seulement si les animations sont permises ;
-       sans JavaScript, l'écran reste caché et la page s'affiche directement. -->
-  <div class="gs-loader" aria-hidden="true">
-    <img class="gs-loader__s gs-loader__s--1" src="/assets/images/hero-shirt.png" alt="" />
-    <img class="gs-loader__s gs-loader__s--2" src="/assets/images/hero-ticket.png" alt="" />
-    <img class="gs-loader__s gs-loader__s--3" src="/assets/images/hero-star.png" alt="" />
-    <img class="gs-loader__s gs-loader__s--4" src="/assets/images/hero-camera.png" alt="" />
-  </div>
-  <script is:inline>
-    (function () {
-      var loader = document.querySelector('.gs-loader');
-      if (!loader || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      var root = document.documentElement;
-      root.classList.add('js-load');                 // affiche l'écran et bloque le défilement
-      var start = Date.now();
-      var MIN = 5000;                                // durée minimale : 5 secondes
-      var finished = false;
-      function finish() {
-        if (finished) return;
-        finished = true;
-        loader.classList.add('is-done');             // l'écran glisse vers le haut
-        setTimeout(function () { root.classList.remove('js-load'); loader.remove(); }, 900);
-      }
-      function ready() { setTimeout(finish, Math.max(0, MIN - (Date.now() - start))); }
-      if (document.readyState === 'complete') ready(); else window.addEventListener('load', ready);
-      setTimeout(finish, 7000);                      // sécurité : jamais plus de 7 s
-    })();
-  </script>
   <!-- ============================ ACCUEIL ============================ -->
   <header id="accueil" class="gs-hero">
     <!-- CADRE — Garde les proportions de la maquette (1280 × 832) et tient
@@ -424,7 +394,7 @@ const riseCols = riseK.map((k, ci) => {
               <label class="gs-form__field"><span>Nom</span><input type="text" name="nom" autocomplete="name" required /></label>
               <label class="gs-form__field"><span>E-mail</span><input type="email" name="email" autocomplete="email" required /></label>
               <label class="gs-form__field"><span>Message</span><textarea name="message" rows="3" required></textarea></label>
-              <button class="gs-form__send" type="submit">Envoyer <i aria-hidden="true">↗</i></button>
+              <button class="gs-form__send" type="submit">Envoyer</button>
             </form>
             <a class="gs-contact__cv" href="/assets/documents/cv-konstance-kruger.pdf" download><span>(Mon CV)</span><b>Télécharger en PDF</b><i aria-hidden="true">↓</i></a>
           </div>
