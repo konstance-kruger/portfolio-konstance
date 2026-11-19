@@ -1276,66 +1276,84 @@ html:has(.gs) { scroll-behavior: smooth; scroll-padding-top: 4.5rem; }
   white-space: nowrap;
   border: 0;
 }
-/* PIED DE PAGE — Lien vers les mentions légales, sous le formulaire de contact. */
-.gs-legal {
-  position: absolute;
-  right: 2.5vw;
-  bottom: 1.2vh;
-  z-index: 5;
-  margin: 0;
-  font: 400 0.8rem/1 var(--sans);
-  color: var(--ink);
-}
-.gs-legal a { color: inherit; text-underline-offset: 3px; }
-.gs-legal a:hover,
-.gs-legal a:focus-visible { color: var(--ink); text-decoration-thickness: 2px; }
+/* PIED DE PAGE — 1) bandeau rose « Parlons-en »  2) bloc sombre : logo + stickers + colonnes de liens  3) crédits.
+   Contrastes : ink sur rose vif (grand texte) ≥ 4:1 ; blanc / lime / rose clair sur ink ≥ 5:1 pour le petit texte. */
+.gs { --hot-soft: #ff8fd2; }   /* rose clair : lisible en petit sur fond sombre (≈ 6:1) */
+.gs .gs-footer { position: relative; z-index: 5; margin: 0; padding: 0; background: var(--ink); color: #fff; overflow: hidden; }
 
-/* ANTI-SAUT — Les textes de l'accueil (data-box) sont placés par grid-site.js selon la police.
-   On les cache (sans les retirer de la page) jusqu'à ce que ce soit fait : aucun déplacement visible.
-   « scripting: enabled » = seulement si JavaScript tourne (sinon le texte reste affiché). */
-@media (scripting: enabled) {
-  .gs [data-box]:not(.is-fit) { visibility: hidden; }
+/* 1) Bandeau rose. */
+.gs .gs-footer__cta {
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: .4em 1.2em;
+  padding: clamp(22px, 3.5vw, 48px) clamp(20px, 5vw, 72px);
+  background: var(--hot); color: var(--ink); text-decoration: none;
+  border-bottom: 3px solid var(--ink);
+  transition: background .25s;
 }
+.gs .gs-footer__cta span { font-size: clamp(15px, 1.6vw, 22px); font-weight: 600; letter-spacing: .02em; }
+.gs .gs-footer__cta b {
+  font-family: 'Rubik Spray Paint', var(--sans); font-weight: 400;
+  font-size: clamp(38px, 8vw, 120px); line-height: 1; text-transform: uppercase;
+}
+.gs .gs-footer__cta i { margin-left: auto; font-style: normal; font-size: clamp(32px, 6vw, 88px); line-height: 1; transition: transform .25s; }
+.gs .gs-footer__cta:hover, .gs .gs-footer__cta:focus-visible { background: var(--lime); }
+.gs .gs-footer__cta:hover i, .gs .gs-footer__cta:focus-visible i { transform: translate(6px, -6px); }
+.gs .gs-footer__cta:focus-visible { outline: 3px solid #fff; outline-offset: -6px; }
 
-/* PIED DE PAGE — bloc sombre en fin de page : nom en grand, trois colonnes de liens, ligne de crédits.
-   Contrastes : blanc sur ink ≈ 11:1 ; lime sur ink 9,7:1. */
-.gs .gs-footer {
+/* 2) Corps sombre, avec la grille rose de la maquette en filigrane. */
+.gs .gs-footer__body {
   position: relative;
-  z-index: 5;
-  background: var(--ink);
-  color: #fff;
-  padding: clamp(40px, 6vw, 88px) clamp(20px, 5vw, 72px) 28px;
-  border-top: 4px solid var(--lime);
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); gap: clamp(28px, 4vw, 64px);
+  padding: clamp(36px, 5vw, 72px) clamp(20px, 5vw, 72px) clamp(24px, 3vw, 40px);
+  background-image:
+    linear-gradient(rgba(233, 75, 176, .22) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(233, 75, 176, .22) 1px, transparent 1px);
+  background-size: 48px 48px;
 }
-.gs .gs-footer__name {
-  margin: 0 0 clamp(28px, 4vw, 56px);
-  font-size: clamp(44px, 11vw, 168px);
-  line-height: .9;
-  letter-spacing: -.03em;
-  text-transform: uppercase;
-  color: #fff;
+
+/* Logo + stickers. */
+.gs .gs-footer__brand { position: relative; padding-bottom: 8px; }
+.gs .gs-footer__logo { display: inline-flex; flex-direction: column; line-height: .8; color: #fff; text-decoration: none; }
+.gs .gs-footer__logo span { font-family: var(--serif); font-size: clamp(22px, 3.2vw, 46px); text-transform: uppercase; }
+.gs .gs-footer__logo b {
+  font-size: clamp(64px, 10vw, 150px); font-style: italic; letter-spacing: -.05em; color: var(--hot);
+  margin-top: .06em;
 }
-.gs .gs-footer__name b { color: var(--lime); font-weight: 900; text-transform: none; }
-.gs .gs-footer__cols {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(24px, 4vw, 64px);
-  padding-bottom: clamp(24px, 3vw, 40px);
-  border-bottom: 1px solid rgba(255, 255, 255, .25);
+.gs .gs-footer__logo:focus-visible { outline: 2px solid var(--lime); outline-offset: 6px; }
+.gs .gs-footer__pill {
+  position: absolute; left: clamp(110px, 17vw, 250px); top: clamp(70px, 9vw, 130px);
+  padding: .15em .7em; border-radius: 999px; background: var(--lime); color: var(--ink);
+  font-weight: 700; font-size: clamp(15px, 1.9vw, 28px); transform: rotate(-8deg);
 }
-.gs .gs-footer h2 {
-  margin: 0 0 14px;
-  font-size: 13px;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--lime);
+.gs .gs-footer__star {
+  position: absolute; right: 4%; top: -4%; width: clamp(54px, 8vw, 118px); height: auto;
+  transform: rotate(14deg); filter: invert(1) drop-shadow(0 0 0 transparent); opacity: .95;
 }
-.gs .gs-footer ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: 16px; }
+.gs .gs-footer__role { margin: clamp(18px, 2.4vw, 32px) 0 0; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--hot-soft); }
+
+/* Colonnes de liens. */
+.gs .gs-footer__cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 3vw, 48px); align-content: start; }
+.gs .gs-footer h2 { margin: 0 0 14px; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--hot-soft); }
+.gs .gs-footer ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 9px; font-size: 16px; }
 .gs .gs-footer li { overflow-wrap: anywhere; }
-.gs .gs-footer a { color: #fff; text-decoration: none; background: linear-gradient(var(--lime), var(--lime)) 0 100% / 0 2px no-repeat; transition: background-size .25s, color .25s; }
-.gs .gs-footer a:hover, .gs .gs-footer a:focus-visible { color: var(--lime); background-size: 100% 2px; }
+.gs .gs-footer__cols li:has(a[href^="mailto:"]) { font-size: 15px; }
+.gs .gs-footer a:not(.gs-footer__cta):not(.gs-footer__logo) {
+  color: #fff; text-decoration: none;
+  background: linear-gradient(var(--hot), var(--hot)) 0 100% / 0 2px no-repeat; transition: background-size .25s, color .25s;
+}
+.gs .gs-footer a:not(.gs-footer__cta):not(.gs-footer__logo):hover,
+.gs .gs-footer a:not(.gs-footer__cta):not(.gs-footer__logo):focus-visible { color: var(--hot-soft); background-size: 100% 2px; }
 .gs .gs-footer a:focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; }
-.gs .gs-footer__small { margin: 20px 0 0; max-width: 70ch; font-size: 13px; line-height: 1.5; color: rgba(255, 255, 255, .8); }
-@media (max-width: 760px) {
+
+/* 3) Crédits. */
+.gs .gs-footer__small {
+  margin: 0; padding: 18px clamp(20px, 5vw, 72px) 26px; max-width: none;
+  font-size: 13px; line-height: 1.5; color: rgba(255, 255, 255, .85);
+  border-top: 1px solid rgba(233, 75, 176, .6);
+}
+@media (max-width: 900px) {
+  .gs .gs-footer__body { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
   .gs .gs-footer__cols { grid-template-columns: 1fr; }
+  .gs .gs-footer__cta i { display: none; }
 }
