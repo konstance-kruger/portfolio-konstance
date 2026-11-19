@@ -76,8 +76,18 @@ function initGridSite() {
       el.style.transform = 'none';
     });
   };
+  // Anti « saut » (CLS) : les textes de l'accueil restent invisibles (voir le CSS, classe .is-fit)
+  // tant que les polices ne sont pas chargées ; on les ajuste alors une dernière fois puis on les montre.
+  // Sans cela, le nom sautait de place quand la vraie police remplaçait la police de secours.
+  const reveal = () => { fit(); root.querySelectorAll('[data-box]').forEach((el) => el.classList.add('is-fit')); };
   fit();
-  document.fonts?.ready.then(fit);
+  if (document.fonts) {
+    document.fonts.ready.then(reveal);
+    document.fonts.addEventListener('loadingdone', fit);   // une police arrivée plus tard : on réajuste
+  } else {
+    reveal();
+  }
+  setTimeout(reveal, 2500);                                 // sécurité : jamais caché plus de 2,5 s
   window.addEventListener('resize', fit, { passive: true });
 
   // PROFONDEUR — Les photos défilent plus lentement que la page (elles semblent

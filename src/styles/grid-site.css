@@ -1289,3 +1289,10 @@ html:has(.gs) { scroll-behavior: smooth; scroll-padding-top: 4.5rem; }
 .gs-legal a { color: inherit; text-underline-offset: 3px; }
 .gs-legal a:hover,
 .gs-legal a:focus-visible { color: var(--ink); text-decoration-thickness: 2px; }
+
+/* ANTI-SAUT — Les textes de l'accueil (data-box) sont placés par grid-site.js selon la police.
+   On les cache (sans les retirer de la page) jusqu'à ce que ce soit fait : aucun déplacement visible.
+   « scripting: enabled » = seulement si JavaScript tourne (sinon le texte reste affiché). */
+@media (scripting: enabled) {
+  .gs [data-box]:not(.is-fit) { visibility: hidden; }
+}
