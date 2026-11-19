@@ -1296,3 +1296,46 @@ html:has(.gs) { scroll-behavior: smooth; scroll-padding-top: 4.5rem; }
 @media (scripting: enabled) {
   .gs [data-box]:not(.is-fit) { visibility: hidden; }
 }
+
+/* PIED DE PAGE — bloc sombre en fin de page : nom en grand, trois colonnes de liens, ligne de crédits.
+   Contrastes : blanc sur ink ≈ 11:1 ; lime sur ink 9,7:1. */
+.gs .gs-footer {
+  position: relative;
+  z-index: 5;
+  background: var(--ink);
+  color: #fff;
+  padding: clamp(40px, 6vw, 88px) clamp(20px, 5vw, 72px) 28px;
+  border-top: 4px solid var(--lime);
+}
+.gs .gs-footer__name {
+  margin: 0 0 clamp(28px, 4vw, 56px);
+  font-size: clamp(44px, 11vw, 168px);
+  line-height: .9;
+  letter-spacing: -.03em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.gs .gs-footer__name b { color: var(--lime); font-weight: 900; text-transform: none; }
+.gs .gs-footer__cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(24px, 4vw, 64px);
+  padding-bottom: clamp(24px, 3vw, 40px);
+  border-bottom: 1px solid rgba(255, 255, 255, .25);
+}
+.gs .gs-footer h2 {
+  margin: 0 0 14px;
+  font-size: 13px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--lime);
+}
+.gs .gs-footer ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: 16px; }
+.gs .gs-footer li { overflow-wrap: anywhere; }
+.gs .gs-footer a { color: #fff; text-decoration: none; background: linear-gradient(var(--lime), var(--lime)) 0 100% / 0 2px no-repeat; transition: background-size .25s, color .25s; }
+.gs .gs-footer a:hover, .gs .gs-footer a:focus-visible { color: var(--lime); background-size: 100% 2px; }
+.gs .gs-footer a:focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; }
+.gs .gs-footer__small { margin: 20px 0 0; max-width: 70ch; font-size: 13px; line-height: 1.5; color: rgba(255, 255, 255, .8); }
+@media (max-width: 760px) {
+  .gs .gs-footer__cols { grid-template-columns: 1fr; }
+}

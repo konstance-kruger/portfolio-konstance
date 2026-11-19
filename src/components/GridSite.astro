@@ -80,7 +80,7 @@ const riseCols = riseK.map((k, ci) => {
       <li class="gs-nav__item">
         <a href="#campus" aria-haspopup="true">vie au campus</a>
         <ul class="gs-nav__sub" aria-label="Vie au campus">
-          <li><a href="#spac">SPAC</a></li>
+          <li><a href="#spac">Vie au campus</a></li>
           <li><a href="#jpo">JPO</a></li>
           <li><a href="#inoui">Festival Inoui</a></li>
         </ul>
@@ -433,6 +433,45 @@ const riseCols = riseK.map((k, ci) => {
       </div>
       <span id="contact" class="gs-turn__end" aria-hidden="true"></span>
     </div>
+
+    <!-- PIED DE PAGE — Rappelle l'essentiel du rendu : qui, comment me joindre, mentions légales,
+         où est le code, qui héberge le site, et la transparence sur l'usage de l'IA. -->
+    <footer class="gs-footer">
+      <p class="gs-footer__name" aria-hidden="true">Konstance <b>kruger</b></p>
+      <div class="gs-footer__cols">
+        <div>
+          <h2>Navigation</h2>
+          <ul>
+            <li><a href="#accueil">Accueil</a></li>
+            <li><a href="#caps">CAPS</a></li>
+            <li><a href="#spac">Vie au campus</a></li>
+            <li><a href="#a-propos">À propos</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h2>Me retrouver</h2>
+          <ul>
+            {profile.linkedin && <li><a href={profile.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a></li>}
+            {profile.instagram && <li><a href={profile.instagram} target="_blank" rel="noopener noreferrer">Instagram</a></li>}
+            {profile.email && <li><a href={`mailto:${profile.email}`}>{profile.email}</a></li>}
+          </ul>
+        </div>
+        <div>
+          <h2>Le site</h2>
+          <ul>
+            <li><a href="/mentions-legales/">Mentions légales</a></li>
+            <li><a href="https://github.com/konstance-kruger/portfolio-konstance" target="_blank" rel="noopener noreferrer">Code source (GitHub)</a></li>
+            <li>Hébergé par Netlify</li>
+            <li>Domaine chez Infomaniak</li>
+          </ul>
+        </div>
+      </div>
+      <p class="gs-footer__small">
+        © 2026 Konstance Kruger · Portfolio BUT MMI, IUT de Belfort-Montbéliard · Design et contenus : Konstance ·
+        Code écrit avec l’aide de l’IA (Claude) à partir de mes consignes, détaillé dans le dépôt (IA.md, JOURNAL.md).
+      </p>
+    </footer>
 
   </div>
 
