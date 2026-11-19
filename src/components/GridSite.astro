@@ -437,26 +437,13 @@ const riseCols = riseK.map((k, ci) => {
     <!-- PIED DE PAGE — Rappelle l'essentiel du rendu : qui, comment me joindre, mentions légales,
          où est le code, qui héberge le site, et la transparence sur l'usage de l'IA. -->
     <footer class="gs-footer">
-      <!-- Bandeau rose : un appel à écrire, le lien ouvre le logiciel de mail. -->
-      {profile.email && (
-        <a class="gs-footer__cta" href={`mailto:${profile.email}`}>
-          <span>Un projet ? Une idée ?</span>
-          <b>Parlons-en</b>
-          <i aria-hidden="true">↗</i>
-        </a>
-      )}
-
       <div class="gs-footer__body">
-        <!-- Logo : le même que dans le menu (KONSTANCE en serif, kruger en italique), en grand,
-             avec la pastille « portfolio » et l'étoile du hero comme petits stickers. -->
+        <!-- Logo : le même que dans le menu (KONSTANCE en serif, kruger en italique), en grand. -->
         <div class="gs-footer__brand">
           <a class="gs-footer__logo" href="#accueil" aria-label="Konstance Kruger, retour en haut">
             <span>Konstance</span>
             <b>kruger</b>
           </a>
-          <span class="gs-footer__pill" aria-hidden="true">portfolio</span>
-          <img class="gs-footer__star" src="/assets/images/hero-star.png" alt="" width="353" height="394" loading="lazy" decoding="async" />
-          <p class="gs-footer__role">Cheffe de projet · Creative producer</p>
         </div>
 
         <div class="gs-footer__cols">
